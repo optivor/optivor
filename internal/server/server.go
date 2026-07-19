@@ -203,7 +203,7 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 
 	fmtStr := strings.ToLower(q.Get("format"))
 	if fmtStr != "" {
-		if fmtStr != "webp" {
+		if fmtStr != "webp" && fmtStr != "avif" {
 			return params, fmt.Errorf("unsupported 'format' parameter: %s", fmtStr)
 		}
 		params.Format = fmtStr
