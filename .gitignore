@@ -1,0 +1,22 @@
+/docs/agents
+
+# Binaries for programs and modules
+*.exe
+*.exe;
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/bin/
+/dist/
+/optivor
+
+# Local config overrides / cache
+optivor.local.yaml
+/tmp/optivor-cache/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/

@@ -16,23 +16,77 @@ you already own.
 
 **Bring Your Own Storage. Control Everything Else.**
 
-## Why Optivor Exists
+---
 
-Almost every product with users ends up needing an image pipeline —
-product photos, avatars, chat attachments, generated assets. And almost
-every team builds roughly the same thing: fetch from storage, resize,
-convert to a modern format, cache, serve, repeat. Then they rebuild it
-again at the next company, or the next project.
+> [!WARNING]
+> **V0 Security Notice:** Optivor V0 does **not** include built-in request signing or authentication (deferred to V0.1). Do **not** expose Optivor directly to the public internet without an external authentication proxy or CDN protection layer.
+>
+> [!CAUTION]
+> **V0 Cache Growth Notice:** The filesystem cache in V0 grows continuously without automated LRU eviction (deferred to V0.1). Manage disk space for your cache directory (`/tmp/optivor-cache`) manually or via cron tasks in production.
+>
+> [!IMPORTANT]
+> **DoS Protection Notice:** Enforce reasonable `max_width` and `max_height` values in `optivor.yaml` to prevent decompression-bomb attacks.
 
-This isn't a hard problem because it's conceptually novel. It's a hard
-problem because it's tedious, easy to get subtly wrong (cache
-invalidation, format negotiation, resource limits), and rarely worth a
-team's full attention — so it gets built once, badly, and then lived
-with for years.
+---
 
-Optivor exists to be the version of this infrastructure you don't have
-to build yourself, without asking you to give up ownership of your data
-to get it.
+## 5-Minute Quick Start
+
+### 1. Build the Binary
+
+Ensure `libvips` development header is installed on your Linux system (`apt install libvips-dev`):
+
+```bash
+make build
+```
+
+This compiles the standalone Go runtime binary to `bin/optivor`.
+
+### 2. Configure `optivor.yaml`
+
+Create an `optivor.yaml` file in your current working directory:
+
+```yaml
+server:
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  image:
+    max_width: 5000   # px DoS limit
+    max_height: 5000  # px DoS limit
+
+storage:
+  s3:
+    endpoint: "https://s3.amazonaws.com"
+    bucket: "my-image-bucket"
+    region: "us-east-1"
+    access_key_id: "YOUR_ACCESS_KEY"
+    secret_access_key: "YOUR_SECRET_KEY"
+
+cache:
+  fs:
+    dir: "/tmp/optivor-cache"
+
+image:
+  contain_background_color: "#ffffff"
+```
+
+### 3. Run Optivor
+
+```bash
+./bin/optivor -config ./optivor.yaml
+```
+
+### 4. Serve Resized & WebP Converted Images
+
+Request any S3 object key with image transformation parameters:
+
+```bash
+curl -i "http://localhost:8080/image/products/123/main.jpg?w=300&h=300&fit=cover&format=webp"
+```
+
+Response will return with `Content-Type: image/webp` and header `X-Optivor-Cache: MISS` (or `HIT` on subsequent requests).
+
+---
 
 ## Core Principles
 
@@ -51,6 +105,8 @@ to get it.
   this project — a storage driver, a deployment adapter — without
   needing to understand the whole codebase to do it.
 
+---
+
 ## Architecture Overview
 
 ```
@@ -63,45 +119,17 @@ Storage Drivers
 Object Storage (yours)
 ```
 
-```
-Deployment Adapter
-  ↓
-Cloudflare / AWS / Kubernetes / Fly.io / Standalone
-```
-
 The runtime knows nothing about cloud providers. Deployment adapters
 know nothing about image processing. Storage drivers know nothing about
 either. Each piece does one job.
 
-The full reasoning behind these boundaries — and the architectural
-decisions that shape them — lives in [`docs/adr/`](./docs/adr), starting
-with [ADR-0000: Project Scope](./docs/adr/0000-project-scope.md).
+The full reasoning behind these boundaries lives in [`docs/adr/`](./docs/adr).
 
-## Getting Started
-
-> Optivor is in early development. The commands below describe the goal
-> for the first release (V0), not something you can run today. Follow
-> [`ROADMAP.md`](./ROADMAP.md) for real status.
-
-```bash
-# point Optivor at an S3-compatible bucket you already own
-optivor-runtime --config optivor.yaml
-```
-
-No account. No dashboard. No dependency on Optivor's continued
-existence. Just a binary, your bucket, and a config file.
+---
 
 ## Roadmap
 
-See [`ROADMAP.md`](./ROADMAP.md) for the current milestone and what's
-explicitly out of scope for now.
-
-## Contributing
-
-Optivor is designed so a contributor can own an entire subsystem — a
-storage driver, a deployment adapter, a runtime module — without needing
-to understand the rest of the codebase. See
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) to get started.
+See [`ROADMAP.md`](./ROADMAP.md) for current milestone status and features deferred to post-V0 releases.
 
 ## License
 

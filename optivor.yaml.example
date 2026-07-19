@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  image:
+    max_width: 5000   # px — DoS protection
+    max_height: 5000  # px — DoS protection
+
+storage:
+  s3:
+    endpoint: "http://localhost:9000"
+    bucket: "my-images"
+    region: "us-east-1"
+    access_key_id: "minioadmin"       # env: OPTIVOR_STORAGE_S3_ACCESS_KEY_ID
+    secret_access_key: "minioadmin"   # env: OPTIVOR_STORAGE_S3_SECRET_ACCESS_KEY
+
+cache:
+  fs:
+    dir: "/tmp/optivor-cache"
+
+image:
+  contain_background_color: "#ffffff"
