@@ -3,6 +3,7 @@ FROM golang:1.23-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libvips-dev \
+    libheif-dev \
     pkg-config \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
@@ -21,6 +22,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libvips42 \
+    libheif1 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
