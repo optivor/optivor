@@ -1,0 +1,116 @@
+package pipeline
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"sync"
+
+	"github.com/davidbyttow/govips/v2/vips"
+	"github.com/optivor/optivor/internal/storage"
+)
+
+type FitMode string
+
+const (
+	FitCover   FitMode = "cover"
+	FitContain FitMode = "contain"
+	FitFill    FitMode = "fill"
+)
+
+type TransformParams struct {
+	Width                  int
+	Height                 int
+	Fit                    FitMode
+	Format                 string // "webp" or ""
+	ContainBackgroundColor string // e.g. "#ffffff"
+}
+
+var (
+	vipsOnce sync.Once
+)
+
+// InitVips ensures libvips is initialized for processing.
+func InitVips() {
+	vipsOnce.Do(func() {
+		vips.LoggingSettings(nil, vips.LogLevelError)
+		vips.Startup(nil)
+	})
+}
+
+// ShutdownVips shuts down libvips engine gracefully.
+func ShutdownVips() {
+	vips.Shutdown()
+}
+
+type Pipeline struct{}
+
+func NewPipeline() *Pipeline {
+	InitVips()
+	return &Pipeline{}
+}
+
+// Run executes the fetch -> transform -> encode image pipeline.
+// Note: This pipeline is completely unaware of caching (per ADR-0002 & plan.md).
+func (p *Pipeline) Run(ctx context.Context, driver storage.StorageDriver, key string, params TransformParams) ([]byte, string, error) {
+	// 1. Fetch source object from storage driver
+	reader, err := driver.Get(ctx, key)
+	if err != nil {
+		return nil, "", err
+	}
+	defer reader.Close()
+
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to read source image stream: %w", err)
+	}
+
+	// If no transformation or format change is requested, passthrough original image bytes
+	if params.Width <= 0 && params.Height <= 0 && params.Format == "" {
+		return data, detectContentType(data), nil
+	}
+
+	// 2. Transform image using govips
+	importParams := vips.NewImportParams()
+	img, err := vips.LoadImageFromBuffer(data, importParams)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decode source image: %w", err)
+	}
+	defer img.Close()
+
+	if params.Width > 0 || params.Height > 0 {
+		if err := applyResize(img, params); err != nil {
+			return nil, "", fmt.Errorf("failed to apply resize: %w", err)
+		}
+	}
+
+	// 3. Encode image
+	buf, contentType, err := exportImage(img, params.Format)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to encode image: %w", err)
+	}
+
+	return buf, contentType, nil
+}
+
+func detectContentType(data []byte) string {
+	if len(data) >= 8 {
+		// PNG signature: \x89PNG\r\n\x1a\n
+		if data[0] == 0x89 && data[1] == 'P' && data[2] == 'N' && data[3] == 'G' {
+			return "image/png"
+		}
+		// JPEG signature: \xFF\xD8\xFF
+		if data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF {
+			return "image/jpeg"
+		}
+		// GIF signature: GIF87a or GIF89a
+		if data[0] == 'G' && data[1] == 'I' && data[2] == 'F' {
+			return "image/gif"
+		}
+		// WebP signature: RIFF....WEBP
+		if string(data[0:4]) == "RIFF" && string(data[8:12]) == "WEBP" {
+			return "image/webp"
+		}
+	}
+	return "application/octet-stream"
+}
