@@ -21,8 +21,8 @@ you already own.
 > [!NOTE]
 > **Signed URLs & Authentication:** Optivor V0.1+ supports HMAC-SHA256 URL signing (`auth.signed_urls.enabled: true`). When enabled, requests require valid `sig` and `expires` query parameters.
 >
-> [!CAUTION]
-> **V0 Cache Growth Notice:** The filesystem cache in V0 grows continuously without automated LRU eviction (deferred to V0.1). Manage disk space for your cache directory (`/tmp/optivor-cache`) manually or via cron tasks in production.
+> [!NOTE]
+> **Automated LRU Cache Eviction:** The filesystem cache automatically performs LRU eviction when disk usage exceeds `cache.fs.max_size_mb` (default: 1024MB).
 >
 > [!IMPORTANT]
 > **DoS Protection Notice:** Enforce reasonable `max_width` and `max_height` values in `optivor.yaml` to prevent decompression-bomb attacks.
