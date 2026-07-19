@@ -1,0 +1,37 @@
+# CODEOWNERS
+#
+# This file defines who is expected to review changes to each part of the
+# repository. It exists from day one, even with a single maintainer,
+# because "who has final say on this PR" should never be ambiguous —
+# see CONTRIBUTING.md.
+#
+# As subsystem ownership is handed off to trusted contributors (see
+# CONTRIBUTING.md), add their GitHub usernames to the relevant lines
+# below rather than leaving everything owned by the core maintainer(s).
+
+# Default owner for anything not covered by a more specific rule below.
+*                           @OPTIVOR_ORG/core-maintainers
+
+# Architecture Decision Records require core maintainer review —
+# these are the project's load-bearing decisions (see ADR-0000/0001).
+/docs/adr/                  @OPTIVOR_ORG/core-maintainers
+
+# Runtime is the hot-path core of the project.
+/runtime/                   @OPTIVOR_ORG/core-maintainers
+
+# Storage drivers can be owned per-driver once a contributor
+# demonstrates sustained ownership (see CONTRIBUTING.md).
+# Example, once assigned:
+# /drivers/s3/              @some-contributor
+# /drivers/azure/           @another-contributor
+
+# Deployment adapters, same pattern as storage drivers.
+# /deploy/cloudflare/       @some-contributor
+
+# CLI
+/cli/                       @OPTIVOR_ORG/core-maintainers
+
+# Governance-adjacent files always require core maintainer sign-off.
+/CONTRIBUTING.md            @OPTIVOR_ORG/core-maintainers
+/CODEOWNERS                 @OPTIVOR_ORG/core-maintainers
+/LICENSE                    @OPTIVOR_ORG/core-maintainers
