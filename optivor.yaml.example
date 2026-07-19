@@ -20,3 +20,10 @@ cache:
 
 image:
   contain_background_color: "#ffffff"
+
+auth:
+  signed_urls:
+    enabled: false          # set true to enforce HMAC signed URLs
+    secret: ""              # env: OPTIVOR_AUTH_SECRET
+    max_age: 3600
+
