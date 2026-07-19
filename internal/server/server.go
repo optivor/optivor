@@ -53,6 +53,7 @@ func (s *Server) setupRouter() {
 	if s.cfg.Server.RequestTimeout > 0 {
 		r.Use(middleware.Timeout(s.cfg.Server.RequestTimeout))
 	}
+	r.Use(RateLimitMiddleware(s.cfg))
 	r.Use(SignedURLMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)

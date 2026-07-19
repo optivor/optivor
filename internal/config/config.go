@@ -18,11 +18,18 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port           int           `mapstructure:"port"`
-	ReadTimeout    time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout   time.Duration `mapstructure:"write_timeout"`
-	RequestTimeout time.Duration `mapstructure:"request_timeout"`
-	Image          ServerImage   `mapstructure:"image"`
+	Port           int             `mapstructure:"port"`
+	ReadTimeout    time.Duration   `mapstructure:"read_timeout"`
+	WriteTimeout   time.Duration   `mapstructure:"write_timeout"`
+	RequestTimeout time.Duration   `mapstructure:"request_timeout"`
+	Image          ServerImage     `mapstructure:"image"`
+	RateLimit      RateLimitConfig `mapstructure:"rate_limit"`
+}
+
+type RateLimitConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+	RPS     int  `mapstructure:"rps"`
+	Burst   int  `mapstructure:"burst"`
 }
 
 type ServerImage struct {
@@ -81,6 +88,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("storage.s3.region", "us-east-1")
 	v.SetDefault("auth.signed_urls.enabled", false)
 	v.SetDefault("auth.signed_urls.max_age", 3600)
+	v.SetDefault("server.rate_limit.enabled", true)
+	v.SetDefault("server.rate_limit.rps", 10)
+	v.SetDefault("server.rate_limit.burst", 20)
 }
 
 // Load reads configuration using Viper and validates required fields.
