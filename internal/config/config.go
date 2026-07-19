@@ -14,6 +14,7 @@ type Config struct {
 	Storage StorageConfig `mapstructure:"storage"`
 	Cache   CacheConfig   `mapstructure:"cache"`
 	Image   ImageConfig   `mapstructure:"image"`
+	Auth    AuthConfig    `mapstructure:"auth"`
 }
 
 type ServerConfig struct {
@@ -52,6 +53,16 @@ type ImageConfig struct {
 	ContainBackgroundColor string `mapstructure:"contain_background_color"`
 }
 
+type AuthConfig struct {
+	SignedURLs SignedURLsConfig `mapstructure:"signed_urls"`
+}
+
+type SignedURLsConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Secret  string `mapstructure:"secret"`
+	MaxAge  int    `mapstructure:"max_age"`
+}
+
 // SetDefaults sets sensible baseline defaults for Viper.
 func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.port", 8080)
@@ -62,6 +73,8 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("cache.fs.dir", "/tmp/optivor-cache")
 	v.SetDefault("image.contain_background_color", "#ffffff")
 	v.SetDefault("storage.s3.region", "us-east-1")
+	v.SetDefault("auth.signed_urls.enabled", false)
+	v.SetDefault("auth.signed_urls.max_age", 3600)
 }
 
 // Load reads configuration using Viper and validates required fields.
@@ -123,6 +136,9 @@ func Validate(cfg *Config) error {
 	}
 	if cfg.Image.ContainBackgroundColor == "" {
 		cfg.Image.ContainBackgroundColor = "#ffffff"
+	}
+	if cfg.Auth.SignedURLs.Enabled && cfg.Auth.SignedURLs.Secret == "" {
+		return errors.New("auth.signed_urls.secret is required when auth.signed_urls.enabled is true")
 	}
 	return nil
 }

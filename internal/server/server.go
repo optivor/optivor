@@ -50,6 +50,7 @@ func (s *Server) setupRouter() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	r.Use(SignedURLMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)
 	r.Get("/image/*", s.handleImage)
