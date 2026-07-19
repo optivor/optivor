@@ -2,15 +2,28 @@ version: 2
 project_name: optivor
 
 builds:
-  - id: optivor
+  - id: optivor-linux-amd64
     main: ./cmd/optivor
     binary: optivor
     env:
       - CGO_ENABLED=1
+      - CC=zig cc -target x86_64-linux-gnu
+      - CXX=zig c++ -target x86_64-linux-gnu
     goos:
       - linux
     goarch:
       - amd64
+
+  - id: optivor-linux-arm64
+    main: ./cmd/optivor
+    binary: optivor
+    env:
+      - CGO_ENABLED=1
+      - CC=zig cc -target aarch64-linux-gnu
+      - CXX=zig c++ -target aarch64-linux-gnu
+    goos:
+      - linux
+    goarch:
       - arm64
 
 archives:

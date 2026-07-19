@@ -14,13 +14,22 @@ type Config struct {
 	Storage StorageConfig `mapstructure:"storage"`
 	Cache   CacheConfig   `mapstructure:"cache"`
 	Image   ImageConfig   `mapstructure:"image"`
+	Auth    AuthConfig    `mapstructure:"auth"`
 }
 
 type ServerConfig struct {
-	Port         int           `mapstructure:"port"`
-	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout time.Duration `mapstructure:"write_timeout"`
-	Image        ServerImage   `mapstructure:"image"`
+	Port           int             `mapstructure:"port"`
+	ReadTimeout    time.Duration   `mapstructure:"read_timeout"`
+	WriteTimeout   time.Duration   `mapstructure:"write_timeout"`
+	RequestTimeout time.Duration   `mapstructure:"request_timeout"`
+	Image          ServerImage     `mapstructure:"image"`
+	RateLimit      RateLimitConfig `mapstructure:"rate_limit"`
+}
+
+type RateLimitConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+	RPS     int  `mapstructure:"rps"`
+	Burst   int  `mapstructure:"burst"`
 }
 
 type ServerImage struct {
@@ -45,11 +54,24 @@ type CacheConfig struct {
 }
 
 type FSCacheConfig struct {
-	Dir string `mapstructure:"dir"`
+	Dir       string `mapstructure:"dir"`
+	MaxSizeMB int64  `mapstructure:"max_size_mb"`
 }
 
 type ImageConfig struct {
 	ContainBackgroundColor string `mapstructure:"contain_background_color"`
+	MaxPixels              int    `mapstructure:"max_pixels"`
+	MaxDecodeMB            int    `mapstructure:"max_decode_mb"`
+}
+
+type AuthConfig struct {
+	SignedURLs SignedURLsConfig `mapstructure:"signed_urls"`
+}
+
+type SignedURLsConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Secret  string `mapstructure:"secret"`
+	MaxAge  int    `mapstructure:"max_age"`
 }
 
 // SetDefaults sets sensible baseline defaults for Viper.
@@ -57,11 +79,20 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.port", 8080)
 	v.SetDefault("server.read_timeout", 30*time.Second)
 	v.SetDefault("server.write_timeout", 30*time.Second)
+	v.SetDefault("server.request_timeout", 30*time.Second)
 	v.SetDefault("server.image.max_width", 5000)
 	v.SetDefault("server.image.max_height", 5000)
 	v.SetDefault("cache.fs.dir", "/tmp/optivor-cache")
+	v.SetDefault("cache.fs.max_size_mb", 1024)
 	v.SetDefault("image.contain_background_color", "#ffffff")
+	v.SetDefault("image.max_pixels", 25000000)
+	v.SetDefault("image.max_decode_mb", 64)
 	v.SetDefault("storage.s3.region", "us-east-1")
+	v.SetDefault("auth.signed_urls.enabled", false)
+	v.SetDefault("auth.signed_urls.max_age", 3600)
+	v.SetDefault("server.rate_limit.enabled", true)
+	v.SetDefault("server.rate_limit.rps", 10)
+	v.SetDefault("server.rate_limit.burst", 20)
 }
 
 // Load reads configuration using Viper and validates required fields.
@@ -123,6 +154,9 @@ func Validate(cfg *Config) error {
 	}
 	if cfg.Image.ContainBackgroundColor == "" {
 		cfg.Image.ContainBackgroundColor = "#ffffff"
+	}
+	if cfg.Auth.SignedURLs.Enabled && cfg.Auth.SignedURLs.Secret == "" {
+		return errors.New("auth.signed_urls.secret is required when auth.signed_urls.enabled is true")
 	}
 	return nil
 }

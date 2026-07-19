@@ -33,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cacheStore, err := fs.New(cfg.Cache.FS.Dir)
+	cacheStore, err := fs.New(cfg.Cache.FS.Dir, cfg.Cache.FS.MaxSizeMB*1024*1024)
 	if err != nil {
 		logger.Error("Failed to initialize filesystem cache", "error", err)
 		os.Exit(1)

@@ -77,7 +77,7 @@ func TestEndToEnd_DefinitionOfDone(t *testing.T) {
 		},
 	}
 
-	cacheStore, err := fs.New(cfg.Cache.FS.Dir)
+	cacheStore, err := fs.New(cfg.Cache.FS.Dir, 0)
 	if err != nil {
 		t.Fatalf("failed to initialize cache store: %v", err)
 	}

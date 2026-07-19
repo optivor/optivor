@@ -2,6 +2,11 @@ server:
   port: 8080
   read_timeout: 30s
   write_timeout: 30s
+  request_timeout: 30s
+  rate_limit:
+    enabled: true
+    rps: 10          # requests per second (per IP)
+    burst: 20        # burst capacity
   image:
     max_width: 5000   # px — DoS protection
     max_height: 5000  # px — DoS protection
@@ -17,6 +22,17 @@ storage:
 cache:
   fs:
     dir: "/tmp/optivor-cache"
+    max_size_mb: 1024
 
 image:
   contain_background_color: "#ffffff"
+  max_pixels: 25000000     # ~5000x5000px limit
+  max_decode_mb: 64        # memory limit
+
+
+auth:
+  signed_urls:
+    enabled: false          # set true to enforce HMAC signed URLs
+    secret: ""              # env: OPTIVOR_AUTH_SECRET
+    max_age: 3600
+

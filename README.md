@@ -18,11 +18,11 @@ you already own.
 
 ---
 
-> [!WARNING]
-> **V0 Security Notice:** Optivor V0 does **not** include built-in request signing or authentication (deferred to V0.1). Do **not** expose Optivor directly to the public internet without an external authentication proxy or CDN protection layer.
+> [!NOTE]
+> **Signed URLs & Authentication:** Optivor V0.1+ supports HMAC-SHA256 URL signing (`auth.signed_urls.enabled: true`). When enabled, requests require valid `sig` and `expires` query parameters.
 >
-> [!CAUTION]
-> **V0 Cache Growth Notice:** The filesystem cache in V0 grows continuously without automated LRU eviction (deferred to V0.1). Manage disk space for your cache directory (`/tmp/optivor-cache`) manually or via cron tasks in production.
+> [!NOTE]
+> **Automated LRU Cache Eviction:** The filesystem cache automatically performs LRU eviction when disk usage exceeds `cache.fs.max_size_mb` (default: 1024MB).
 >
 > [!IMPORTANT]
 > **DoS Protection Notice:** Enforce reasonable `max_width` and `max_height` values in `optivor.yaml` to prevent decompression-bomb attacks.
@@ -50,6 +50,11 @@ server:
   port: 8080
   read_timeout: 30s
   write_timeout: 30s
+  request_timeout: 30s
+  rate_limit:
+    enabled: true
+    rps: 10
+    burst: 20
   image:
     max_width: 5000   # px DoS limit
     max_height: 5000  # px DoS limit

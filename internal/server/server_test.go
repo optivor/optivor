@@ -59,7 +59,7 @@ func setupTestServer(t *testing.T, files map[string][]byte) (*server.Server, htt
 
 	mockStore := &mockStorage{files: files}
 	tmpCacheDir := t.TempDir()
-	cacheStore, err := fs.New(tmpCacheDir)
+	cacheStore, err := fs.New(tmpCacheDir, 0)
 	if err != nil {
 		t.Fatalf("failed to init cache: %v", err)
 	}
@@ -157,5 +157,38 @@ func TestImageRoute_ValidationErrors(t *testing.T) {
 				t.Errorf("expected 400 Bad Request for %s, got %d", tc.url, rec.Code)
 			}
 		})
+	}
+}
+
+func TestImageRoute_OversizedImage(t *testing.T) {
+	jpgData := createTestJPEG(300, 300) // 90,000 pixels
+	files := map[string][]byte{
+		"large.jpg": jpgData,
+	}
+
+	cfg := &config.Config{
+		Server: config.ServerConfig{
+			Port: 8080,
+			Image: config.ServerImage{
+				MaxWidth:  2000,
+				MaxHeight: 2000,
+			},
+		},
+		Image: config.ImageConfig{
+			ContainBackgroundColor: "#ffffff",
+			MaxPixels:              50000, // 50k max pixels < 90k
+		},
+	}
+
+	mockStore := &mockStorage{files: files}
+	pipe := pipeline.NewPipeline()
+	srv := server.New(cfg, mockStore, nil, pipe, nil)
+
+	req := httptest.NewRequest("GET", "/image/large.jpg?w=100&h=100", nil)
+	rec := httptest.NewRecorder()
+	srv.Router().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Errorf("expected 413 StatusRequestEntityTooLarge, got %d", rec.Code)
 	}
 }

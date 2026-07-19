@@ -15,14 +15,14 @@ Full scope: [`docs/adr/0000-project-scope.md`](./docs/adr/0000-project-scope.md)
 Status: 🚧 in progress — architecture decisions locked (ADR-0000 through
 ADR-0004), runtime implementation not yet started.
 
-## V0.1 — Make it safe to expose
+## V0.1 — Make it safe to expose (In Progress)
 
-- Signed URLs and basic policy-based authorization
-- AVIF output (pending a decision on encoder dependency — see the note
-  in ADR-0000)
-- Resource limits: max pixel count, max memory per transform, request
-  timeouts (decompression-bomb protection)
-- Basic rate limiting
+- [x] Signed URLs and basic policy-based authorization (ADR-0005)
+- [x] AVIF output support (`libheif-dev`)
+- [x] Resource limits: max pixel count, max memory per transform, request timeouts (decompression-bomb protection)
+- [x] Basic per-IP rate limiting
+- [x] LRU cache eviction
+- [x] Cross-compilation matrix (Zig-based toolchain in `.goreleaser.yaml`)
 
 ## V0.2 — First deployment adapter
 

@@ -50,6 +50,11 @@ func (s *Server) setupRouter() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	if s.cfg.Server.RequestTimeout > 0 {
+		r.Use(middleware.Timeout(s.cfg.Server.RequestTimeout))
+	}
+	r.Use(RateLimitMiddleware(s.cfg))
+	r.Use(SignedURLMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)
 	r.Get("/image/*", s.handleImage)
@@ -122,6 +127,14 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "object not found", http.StatusNotFound)
 			return
 		}
+		if errors.Is(err, pipeline.ErrOversizedImage) {
+			http.Error(w, err.Error(), http.StatusRequestEntityTooLarge)
+			return
+		}
+		if errors.Is(r.Context().Err(), context.DeadlineExceeded) || errors.Is(err, context.DeadlineExceeded) {
+			http.Error(w, "request timeout", http.StatusRequestTimeout)
+			return
+		}
 		// Distinguish storage gateway errors vs image processing errors
 		if strings.Contains(err.Error(), "failed to get object from S3") || strings.Contains(err.Error(), "failed to stat object") {
 			s.logger.Error("Storage error", "key", key, "error", err)
@@ -151,6 +164,7 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 	q := r.URL.Query()
 	params := pipeline.TransformParams{
 		ContainBackgroundColor: s.cfg.Image.ContainBackgroundColor,
+		MaxPixels:              s.cfg.Image.MaxPixels,
 	}
 
 	if wStr := q.Get("w"); wStr != "" {
@@ -189,7 +203,7 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 
 	fmtStr := strings.ToLower(q.Get("format"))
 	if fmtStr != "" {
-		if fmtStr != "webp" {
+		if fmtStr != "webp" && fmtStr != "avif" {
 			return params, fmt.Errorf("unsupported 'format' parameter: %s", fmtStr)
 		}
 		params.Format = fmtStr
