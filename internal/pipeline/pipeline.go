@@ -2,12 +2,17 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
 
 	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/optivor/optivor/internal/storage"
+)
+
+var (
+	ErrOversizedImage = errors.New("source image exceeds maximum allowed pixel count")
 )
 
 type FitMode string
@@ -24,6 +29,7 @@ type TransformParams struct {
 	Fit                    FitMode
 	Format                 string // "webp" or ""
 	ContainBackgroundColor string // e.g. "#ffffff"
+	MaxPixels              int
 }
 
 var (
@@ -77,6 +83,10 @@ func (p *Pipeline) Run(ctx context.Context, driver storage.StorageDriver, key st
 		return nil, "", fmt.Errorf("failed to decode source image: %w", err)
 	}
 	defer img.Close()
+
+	if params.MaxPixels > 0 && (img.Width()*img.Height()) > params.MaxPixels {
+		return nil, "", ErrOversizedImage
+	}
 
 	if params.Width > 0 || params.Height > 0 {
 		if err := applyResize(img, params); err != nil {
