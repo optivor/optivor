@@ -54,7 +54,8 @@ type CacheConfig struct {
 }
 
 type FSCacheConfig struct {
-	Dir string `mapstructure:"dir"`
+	Dir       string `mapstructure:"dir"`
+	MaxSizeMB int64  `mapstructure:"max_size_mb"`
 }
 
 type ImageConfig struct {
@@ -82,6 +83,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.image.max_width", 5000)
 	v.SetDefault("server.image.max_height", 5000)
 	v.SetDefault("cache.fs.dir", "/tmp/optivor-cache")
+	v.SetDefault("cache.fs.max_size_mb", 1024)
 	v.SetDefault("image.contain_background_color", "#ffffff")
 	v.SetDefault("image.max_pixels", 25000000)
 	v.SetDefault("image.max_decode_mb", 64)

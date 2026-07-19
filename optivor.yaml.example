@@ -22,6 +22,7 @@ storage:
 cache:
   fs:
     dir: "/tmp/optivor-cache"
+    max_size_mb: 1024
 
 image:
   contain_background_color: "#ffffff"
