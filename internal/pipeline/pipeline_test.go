@@ -109,6 +109,32 @@ func TestPipeline_ResizeWebP(t *testing.T) {
 	}
 }
 
+func TestPipeline_OversizedImage(t *testing.T) {
+	rawJPG := createTestJPEG(200, 200) // 40,000 pixels
+	driver := &mockStorageDriver{
+		data: map[string][]byte{
+			"sample.jpg": rawJPG,
+		},
+	}
+
+	pipe := pipeline.NewPipeline()
+	ctx := context.Background()
+
+	params := pipeline.TransformParams{
+		Width:     100,
+		Height:    100,
+		MaxPixels: 10000, // lower than 40,000
+	}
+
+	_, _, err := pipe.Run(ctx, driver, "sample.jpg", params)
+	if err == nil {
+		t.Fatal("expected error for oversized image, got nil")
+	}
+	if err != pipeline.ErrOversizedImage {
+		t.Errorf("expected ErrOversizedImage, got %v", err)
+	}
+}
+
 func BenchmarkPipeline_ResizeWebP(b *testing.B) {
 	rawJPG := createTestJPEG(800, 600)
 	driver := &mockStorageDriver{
