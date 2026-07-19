@@ -135,6 +135,38 @@ func TestPipeline_OversizedImage(t *testing.T) {
 	}
 }
 
+func TestPipeline_AVIF(t *testing.T) {
+	rawJPG := createTestJPEG(200, 200)
+	driver := &mockStorageDriver{
+		data: map[string][]byte{
+			"sample.jpg": rawJPG,
+		},
+	}
+
+	pipe := pipeline.NewPipeline()
+	ctx := context.Background()
+
+	params := pipeline.TransformParams{
+		Width:  100,
+		Height: 100,
+		Fit:    pipeline.FitCover,
+		Format: "avif",
+	}
+
+	res, contentType, err := pipe.Run(ctx, driver, "sample.jpg", params)
+	if err != nil {
+		t.Fatalf("avif export failed: %v", err)
+	}
+
+	if contentType != "image/avif" {
+		t.Errorf("expected image/avif, got %s", contentType)
+	}
+
+	if len(res) == 0 {
+		t.Error("expected non-empty avif byte output")
+	}
+}
+
 func BenchmarkPipeline_ResizeWebP(b *testing.B) {
 	rawJPG := createTestJPEG(800, 600)
 	driver := &mockStorageDriver{
