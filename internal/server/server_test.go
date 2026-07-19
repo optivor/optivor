@@ -159,3 +159,36 @@ func TestImageRoute_ValidationErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestImageRoute_OversizedImage(t *testing.T) {
+	jpgData := createTestJPEG(300, 300) // 90,000 pixels
+	files := map[string][]byte{
+		"large.jpg": jpgData,
+	}
+
+	cfg := &config.Config{
+		Server: config.ServerConfig{
+			Port: 8080,
+			Image: config.ServerImage{
+				MaxWidth:  2000,
+				MaxHeight: 2000,
+			},
+		},
+		Image: config.ImageConfig{
+			ContainBackgroundColor: "#ffffff",
+			MaxPixels:              50000, // 50k max pixels < 90k
+		},
+	}
+
+	mockStore := &mockStorage{files: files}
+	pipe := pipeline.NewPipeline()
+	srv := server.New(cfg, mockStore, nil, pipe, nil)
+
+	req := httptest.NewRequest("GET", "/image/large.jpg?w=100&h=100", nil)
+	rec := httptest.NewRecorder()
+	srv.Router().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Errorf("expected 413 StatusRequestEntityTooLarge, got %d", rec.Code)
+	}
+}

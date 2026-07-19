@@ -2,6 +2,7 @@ server:
   port: 8080
   read_timeout: 30s
   write_timeout: 30s
+  request_timeout: 30s
   image:
     max_width: 5000   # px — DoS protection
     max_height: 5000  # px — DoS protection
@@ -20,6 +21,9 @@ cache:
 
 image:
   contain_background_color: "#ffffff"
+  max_pixels: 25000000     # ~5000x5000px limit
+  max_decode_mb: 64        # memory limit
+
 
 auth:
   signed_urls:
