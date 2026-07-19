@@ -121,6 +121,10 @@ func detectContentType(data []byte) string {
 		if string(data[0:4]) == "RIFF" && string(data[8:12]) == "WEBP" {
 			return "image/webp"
 		}
+		// AVIF signature: ....ftypavif or ....ftypavis
+		if len(data) >= 12 && string(data[4:8]) == "ftyp" && (string(data[8:12]) == "avif" || string(data[8:12]) == "avis") {
+			return "image/avif"
+		}
 	}
 	return "application/octet-stream"
 }
