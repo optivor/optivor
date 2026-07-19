@@ -10,7 +10,7 @@ import (
 
 func TestFSCache_SetAndGet(t *testing.T) {
 	tmpDir := t.TempDir()
-	cacheStore, err := fs.New(tmpDir)
+	cacheStore, err := fs.New(tmpDir, 0)
 	if err != nil {
 		t.Fatalf("failed to create FSCache: %v", err)
 	}

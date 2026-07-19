@@ -59,7 +59,7 @@ func setupTestServer(t *testing.T, files map[string][]byte) (*server.Server, htt
 
 	mockStore := &mockStorage{files: files}
 	tmpCacheDir := t.TempDir()
-	cacheStore, err := fs.New(tmpCacheDir)
+	cacheStore, err := fs.New(tmpCacheDir, 0)
 	if err != nil {
 		t.Fatalf("failed to init cache: %v", err)
 	}

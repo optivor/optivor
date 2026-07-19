@@ -6,22 +6,25 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"time"
 
 	"github.com/optivor/optivor/internal/pipeline"
 )
 
 type FSCache struct {
-	dir string
+	dir          string
+	maxSizeBytes int64
 }
 
-func New(dir string) (*FSCache, error) {
+func New(dir string, maxSizeBytes int64) (*FSCache, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("cache directory path cannot be empty")
 	}
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create cache directory: %w", err)
 	}
-	return &FSCache{dir: dir}, nil
+	return &FSCache{dir: dir, maxSizeBytes: maxSizeBytes}, nil
 }
 
 func (c *FSCache) generateKey(key string, params pipeline.TransformParams) string {
@@ -42,6 +45,10 @@ func (c *FSCache) Get(key string, params pipeline.TransformParams) ([]byte, stri
 		}
 		return nil, "", false, fmt.Errorf("failed to read cache file: %w", err)
 	}
+
+	// Update mod time to track LRU access
+	now := time.Now()
+	_ = os.Chtimes(filePath, now, now)
 
 	if len(fileData) < 1 {
 		return nil, "", false, nil
@@ -88,6 +95,64 @@ func (c *FSCache) Set(key string, params pipeline.TransformParams, data []byte, 
 	if err := os.Rename(tmpName, filePath); err != nil {
 		os.Remove(tmpName)
 		return fmt.Errorf("failed to commit cache file: %w", err)
+	}
+
+	_ = c.evictIfNeeded()
+
+	return nil
+}
+
+type fileEntry struct {
+	path    string
+	size    int64
+	modTime time.Time
+}
+
+func (c *FSCache) evictIfNeeded() error {
+	if c.maxSizeBytes <= 0 {
+		return nil
+	}
+
+	entries, err := os.ReadDir(c.dir)
+	if err != nil {
+		return err
+	}
+
+	var files []fileEntry
+	var totalSize int64
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+		files = append(files, fileEntry{
+			path:    filepath.Join(c.dir, entry.Name()),
+			size:    info.Size(),
+			modTime: info.ModTime(),
+		})
+		totalSize += info.Size()
+	}
+
+	if totalSize <= c.maxSizeBytes {
+		return nil
+	}
+
+	// Sort oldest modTime first
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].modTime.Before(files[j].modTime)
+	})
+
+	for _, f := range files {
+		if totalSize <= c.maxSizeBytes {
+			break
+		}
+		if err := os.Remove(f.path); err == nil {
+			totalSize -= f.size
+		}
 	}
 
 	return nil
