@@ -10,7 +10,7 @@
 *.out
 /bin/
 /dist/
-optivor
+/optivor
 
 # Local config overrides / cache
 optivor.local.yaml
