@@ -50,6 +50,11 @@ server:
   port: 8080
   read_timeout: 30s
   write_timeout: 30s
+  request_timeout: 30s
+  rate_limit:
+    enabled: true
+    rps: 10
+    burst: 20
   image:
     max_width: 5000   # px DoS limit
     max_height: 5000  # px DoS limit
