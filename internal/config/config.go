@@ -12,10 +12,24 @@ import (
 type Config struct {
 	Server    ServerConfig    `mapstructure:"server"`
 	Storage   StorageConfig   `mapstructure:"storage"`
+	Buckets   []BucketConfig  `mapstructure:"buckets"`
 	Cache     CacheConfig     `mapstructure:"cache"`
 	Image     ImageConfig     `mapstructure:"image"`
 	Auth      AuthConfig      `mapstructure:"auth"`
 	Telemetry TelemetryConfig `mapstructure:"telemetry"`
+}
+
+type BucketConfig struct {
+	Name            string `mapstructure:"name"`
+	Provider        string `mapstructure:"provider"`
+	Endpoint        string `mapstructure:"endpoint"`
+	Bucket          string `mapstructure:"bucket"`
+	Region          string `mapstructure:"region"`
+	AccountID       string `mapstructure:"account_id"`
+	AccessKeyID     string `mapstructure:"access_key_id"`
+	SecretAccessKey string `mapstructure:"secret_access_key"`
+	Access          string `mapstructure:"access"`
+	Fallback        string `mapstructure:"fallback"`
 }
 
 type TelemetryConfig struct {
@@ -160,11 +174,25 @@ func Validate(cfg *Config) error {
 	if cfg.Server.Image.MaxHeight <= 0 {
 		return errors.New("server.image.max_height must be > 0")
 	}
-	if cfg.Storage.S3.Endpoint == "" {
-		return errors.New("storage.s3.endpoint is required")
-	}
-	if cfg.Storage.S3.Bucket == "" {
-		return errors.New("storage.s3.bucket is required")
+	if len(cfg.Buckets) > 0 {
+		for i, b := range cfg.Buckets {
+			if b.Name == "" {
+				return fmt.Errorf("buckets[%d].name is required", i)
+			}
+			if b.Endpoint == "" {
+				return fmt.Errorf("buckets[%d].endpoint is required", i)
+			}
+			if b.Bucket == "" {
+				return fmt.Errorf("buckets[%d].bucket is required", i)
+			}
+		}
+	} else {
+		if cfg.Storage.S3.Endpoint == "" {
+			return errors.New("storage.s3.endpoint is required")
+		}
+		if cfg.Storage.S3.Bucket == "" {
+			return errors.New("storage.s3.bucket is required")
+		}
 	}
 	if cfg.Cache.FS.Dir == "" {
 		return errors.New("cache.fs.dir is required")

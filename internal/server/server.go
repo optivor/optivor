@@ -17,6 +17,7 @@ import (
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/storage"
+	"github.com/optivor/optivor/internal/storage/router"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -25,9 +26,10 @@ type Server struct {
 	driver  storage.StorageDriver
 	cache   cache.Cache
 	pipe    *pipeline.Pipeline
-	router  chi.Router
-	srv     *http.Server
-	logger  *slog.Logger
+	bucketRouter router.BucketRouter
+	router       chi.Router
+	srv          *http.Server
+	logger       *slog.Logger
 }
 
 func New(cfg *config.Config, driver storage.StorageDriver, cacheStore cache.Cache, pipe *pipeline.Pipeline, logger *slog.Logger) *Server {
@@ -45,6 +47,10 @@ func New(cfg *config.Config, driver storage.StorageDriver, cacheStore cache.Cach
 
 	s.setupRouter()
 	return s
+}
+
+func (s *Server) SetBucketRouter(r router.BucketRouter) {
+	s.bucketRouter = r
 }
 
 func (s *Server) setupRouter() {
@@ -119,6 +125,18 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	driverToUse := s.driver
+	if s.bucketRouter != nil {
+		parts := strings.SplitN(key, "/", 2)
+		if len(parts) == 2 {
+			if drv, alias, err := s.bucketRouter.Resolve(r.Context(), parts[0]); err == nil && drv != nil {
+				driverToUse = drv
+				key = parts[1]
+				_ = alias
+			}
+		}
+	}
+
 	params, err := s.parseQueryParams(r)
 	if err != nil {
 		statusCode = http.StatusBadRequest
@@ -147,7 +165,7 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Cache Miss -> Run Pipeline
 	transformStart := time.Now()
-	data, contentType, err := s.pipe.Run(r.Context(), s.driver, key, params)
+	data, contentType, err := s.pipe.Run(r.Context(), driverToUse, key, params)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			statusCode = http.StatusNotFound
