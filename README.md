@@ -203,6 +203,19 @@ The full reasoning behind these boundaries lives in [`docs/adr/`](./docs/adr).
 
 ---
 
+## Documentation
+
+Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
+
+- [Introduction](./docs/wiki/introduction.md) — Framework overview and philosophy
+- [Quick Start Guide](./docs/wiki/quick-start.md) — 5-minute setup with Docker
+- [CLI Reference](./docs/wiki/cli-reference.md) — Command and flag reference
+- [Configuration Reference](./docs/wiki/configuration.md) — `optivor.yaml` schema & environment overrides
+- [Storage Driver Guide](./docs/wiki/storage-drivers.md) — Building custom storage drivers
+- [FAQ](./docs/wiki/faq.md) — Frequently asked questions
+
+---
+
 ## Roadmap
 
 See [`ROADMAP.md`](./ROADMAP.md) for current milestone status and features deferred to post-V0 releases.
