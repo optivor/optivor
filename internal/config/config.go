@@ -48,7 +48,8 @@ type ServerImage struct {
 }
 
 type StorageConfig struct {
-	S3 S3Config `mapstructure:"s3"`
+	Driver string   `mapstructure:"driver"`
+	S3     S3Config `mapstructure:"s3"`
 }
 
 type S3Config struct {
@@ -99,6 +100,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("image.contain_background_color", "#ffffff")
 	v.SetDefault("image.max_pixels", 25000000)
 	v.SetDefault("image.max_decode_mb", 64)
+	v.SetDefault("storage.driver", "s3")
 	v.SetDefault("storage.s3.region", "us-east-1")
 	v.SetDefault("auth.signed_urls.enabled", false)
 	v.SetDefault("auth.signed_urls.max_age", 3600)
