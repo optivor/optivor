@@ -45,15 +45,29 @@ Status: ✅ Completed.
 - [x] `optivor driver install` CLI subcommand suite for external driver management
 - [x] Complete documentation wiki (`docs/wiki/`) and developer driver creation guides
 
-## V0.6 — Multi-Provider & Multi-Bucket Management (Planned)
+## V0.6 — Multi-Provider & Multi-Bucket Management (Completed)
 
 Goal: Manage multiple storage buckets across diverse providers (AWS S3, Cloudflare R2, Backblaze B2, GCS) from a single unified Optivor instance.
 
-- [ ] Multi-bucket routing engine (`internal/storage/router`) mapping bucket identifiers/prefixes to specific driver instances
-- [ ] Declarative multi-bucket configuration schema in `optivor.yaml`
-- [ ] Cross-provider failover and primary/backup bucket fallback policies
-- [ ] Per-bucket metrics and telemetry breakdown in `optivor metrics` and OpenTelemetry spans
-- [ ] CLI multi-bucket verification in `optivor doctor`
+- [x] Multi-bucket routing engine (`internal/storage/router`) mapping bucket identifiers/prefixes to specific driver instances (ADR-0011)
+- [x] Declarative multi-bucket configuration schema in `optivor.yaml`
+- [x] Cross-provider failover and primary/backup bucket fallback policies
+- [x] Per-bucket metrics and telemetry breakdown in `optivor metrics` and OpenTelemetry spans
+- [x] CLI multi-bucket verification in `optivor doctor`
+
+## V0.6.1 — GitHub Driver Installation (Completed)
+
+- [x] `optivor driver install` support for `github:org/repo[@tag]` shorthand and HTTPS URLs
+
+## V0.7 — Edge Integration & Lifecycle Management (Completed)
+
+- [x] Edge deployment strategy and proxy routing guide (ADR-0012)
+- [x] CLI `optivor bucket lifecycle` (`list`, `set`, `delete`) management subcommands
+
+## V0.8 — Production Hardening & Benchmark Gating (Completed)
+
+- [x] External driver protocol SDK specification (`docs/wiki/driver-sdk-specification.md`)
+- [x] CI benchmark regression gating job (`go test -bench`)
 
 ## V1 — Extension points
 
