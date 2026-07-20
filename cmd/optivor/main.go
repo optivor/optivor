@@ -19,7 +19,7 @@ import (
 func main() {
 	if len(os.Args) > 1 {
 		cmd := os.Args[1]
-		if cmd == "init" || cmd == "deploy" || cmd == "doctor" || cmd == "logs" || cmd == "metrics" || cmd == "help" || cmd == "-v" || cmd == "--version" || cmd == "-h" || cmd == "--help" {
+		if cmd == "init" || cmd == "deploy" || cmd == "doctor" || cmd == "logs" || cmd == "metrics" || cmd == "driver" || cmd == "help" || cmd == "-v" || cmd == "--version" || cmd == "-h" || cmd == "--help" {
 			if err := cli.Execute(); err != nil {
 				os.Exit(1)
 			}
@@ -28,19 +28,30 @@ func main() {
 	}
 
 	configPath := flag.String("config", "", "path to config file (default: ./optivor.yaml)")
+	provider := flag.String("provider", "", "override storage provider (e.g. s3, minio, r2)")
 	flag.Parse()
 
-	runServer(*configPath)
+	runServer(*configPath, *provider)
 }
 
-func runServer(configPath string) {
+func runServer(configPath string, providerFlag string) {
 	cfg, err := config.Load(configPath)
 	if err != nil {
 		slog.Error("Failed to load configuration", "error", err)
 		os.Exit(1)
 	}
 
+	if providerFlag != "" {
+		cfg.Storage.Driver = providerFlag
+	}
+
 	logger := server.NewLogger(cfg, os.Stdout)
+
+	drv := cfg.Storage.Driver
+	if drv != "" && drv != "s3" && drv != "minio" && drv != "r2" {
+		logger.Error("Unknown storage provider", "provider", drv)
+		os.Exit(1)
+	}
 
 	storageDriver, err := s3.New(cfg.Storage.S3)
 	if err != nil {
