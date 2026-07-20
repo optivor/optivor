@@ -54,9 +54,19 @@ func RunDoctor(configPath string) error {
 		fmt.Println("  ✅ Signed URL security check skipped (disabled)")
 	}
 
-	// Check 3: S3 config validation
+	// Check 3: Storage config validation (single vs multi-bucket)
 	if cfg != nil {
-		if cfg.Storage.S3.Endpoint != "" && cfg.Storage.S3.Bucket != "" {
+		if len(cfg.Buckets) > 0 {
+			fmt.Printf("  ✅ Multi-bucket mode configured (%d buckets)\n", len(cfg.Buckets))
+			for _, b := range cfg.Buckets {
+				if b.Endpoint == "" || b.Bucket == "" {
+					fmt.Printf("  ❌ Bucket %q configuration incomplete (missing endpoint or bucket)\n", b.Name)
+					hasErrors = true
+				} else {
+					fmt.Printf("  ✅ Bucket %q valid (Provider: %s, Endpoint: %s, Access: %s)\n", b.Name, b.Provider, b.Endpoint, b.Access)
+				}
+			}
+		} else if cfg.Storage.S3.Endpoint != "" && cfg.Storage.S3.Bucket != "" {
 			fmt.Printf("  ✅ Storage configuration valid (Endpoint: %s, Bucket: %s)\n", cfg.Storage.S3.Endpoint, cfg.Storage.S3.Bucket)
 		} else {
 			fmt.Println("  ❌ Storage configuration incomplete (missing endpoint or bucket)")
