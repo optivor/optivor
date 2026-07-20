@@ -10,11 +10,14 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/optivor/optivor/internal/cache/fs"
+	"github.com/optivor/optivor/internal/cli"
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/server"
@@ -164,5 +167,39 @@ func TestV02Acceptance(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	if !bytes.Contains(body, []byte("optivor_cache_hits_total")) {
 		t.Errorf("expected /metrics to contain optivor_cache_hits_total, got: %s", string(body))
+	}
+}
+
+func TestV03Acceptance(t *testing.T) {
+	tempDir := t.TempDir()
+	origWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get current working directory: %v", err)
+	}
+	defer func() { _ = os.Chdir(origWd) }()
+	_ = os.Chdir(tempDir)
+
+	// 1. Verify 'optivor init' scaffolding
+	if err := cli.RunInit(false); err != nil {
+		t.Fatalf("optivor init failed: %v", err)
+	}
+
+	cfgPath := filepath.Join(tempDir, "optivor.yaml")
+	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+		t.Fatalf("expected optivor.yaml to exist after init")
+	}
+
+	// 2. Verify config loading from scaffolded file
+	cfg, err := config.Load(cfgPath)
+	if err != nil {
+		t.Fatalf("failed to load scaffolded optivor.yaml: %v", err)
+	}
+	if cfg.Server.Port != 8080 {
+		t.Errorf("expected default port 8080, got %d", cfg.Server.Port)
+	}
+
+	// 3. Verify 'optivor deploy --dry-run --adapter systemd'
+	if err := cli.RunDeploy("systemd", cfgPath, true); err != nil {
+		t.Fatalf("optivor deploy dry-run failed: %v", err)
 	}
 }
