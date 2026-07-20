@@ -9,6 +9,7 @@ import (
 
 	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/optivor/optivor/internal/storage"
+	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -59,6 +60,8 @@ func NewPipeline() *Pipeline {
 // Run executes the fetch -> transform -> encode image pipeline.
 // Note: This pipeline is completely unaware of caching (per ADR-0002 & plan.md).
 func (p *Pipeline) Run(ctx context.Context, driver storage.StorageDriver, key string, params TransformParams) ([]byte, string, error) {
+	ctx, span := otel.Tracer("optivor").Start(ctx, "pipeline.Transform")
+	defer span.End()
 	// 1. Fetch source object from storage driver
 	reader, err := driver.Get(ctx, key)
 	if err != nil {
