@@ -51,6 +51,8 @@ server:
   read_timeout: 30s
   write_timeout: 30s
   request_timeout: 30s
+  log_level: "info"      # debug | info | warn | error
+  log_format: "text"     # text | json
   rate_limit:
     enabled: true
     rps: 10

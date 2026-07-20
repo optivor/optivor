@@ -19,13 +19,13 @@ func main() {
 	configPath := flag.String("config", "", "path to config file (default: ./optivor.yaml)")
 	flag.Parse()
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-
 	cfg, err := config.Load(*configPath)
 	if err != nil {
-		logger.Error("Failed to load configuration", "error", err)
+		slog.Error("Failed to load configuration", "error", err)
 		os.Exit(1)
 	}
+
+	logger := server.NewLogger(cfg, os.Stdout)
 
 	storageDriver, err := s3.New(cfg.Storage.S3)
 	if err != nil {
