@@ -1,4 +1,10 @@
-.PHONY: build test lint release test-e2e clean install uninstall
+.PHONY: build test lint release test-e2e clean install uninstall docker-build docker-run
+
+docker-build:
+	docker build -t optivor:latest .
+
+docker-run:
+	docker run -d --name optivor -p 8080:8080 -v $(PWD)/optivor.yaml.example:/etc/optivor/optivor.yaml:ro optivor:latest
 
 build:
 	go build -o bin/optivor ./cmd/optivor
