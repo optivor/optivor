@@ -115,6 +115,28 @@ Deploy the Optivor service using systemd deployment adapter:
 ./bin/optivor deploy --adapter systemd --dry-run
 ```
 
+### 7. Diagnostics & Health Check
+
+Run health and configuration diagnostics:
+
+```bash
+./bin/optivor doctor
+```
+
+### 8. Inspect Service Logs & Metrics via CLI
+
+Tail systemd service logs:
+
+```bash
+./bin/optivor logs --lines 100 --follow
+```
+
+Scrape and view Prometheus metrics:
+
+```bash
+./bin/optivor metrics
+```
+
 ---
 
 ## Core Principles

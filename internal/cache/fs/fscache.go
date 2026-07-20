@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/optivor/optivor/internal/pipeline"
+	"go.opentelemetry.io/otel"
 )
 
 type FSCache struct {
@@ -35,6 +37,9 @@ func (c *FSCache) generateKey(key string, params pipeline.TransformParams) strin
 }
 
 func (c *FSCache) Get(key string, params pipeline.TransformParams) ([]byte, string, bool, error) {
+	_, span := otel.Tracer("optivor").Start(context.Background(), "cache.Get")
+	defer span.End()
+
 	cacheKey := c.generateKey(key, params)
 	filePath := filepath.Join(c.dir, cacheKey)
 
@@ -66,6 +71,9 @@ func (c *FSCache) Get(key string, params pipeline.TransformParams) ([]byte, stri
 }
 
 func (c *FSCache) Set(key string, params pipeline.TransformParams, data []byte, contentType string) error {
+	_, span := otel.Tracer("optivor").Start(context.Background(), "cache.Set")
+	defer span.End()
+
 	cacheKey := c.generateKey(key, params)
 	filePath := filepath.Join(c.dir, cacheKey)
 

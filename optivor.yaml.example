@@ -38,3 +38,10 @@ auth:
     secret: ""              # env: OPTIVOR_AUTH_SECRET
     max_age: 3600
 
+telemetry:
+  enabled: false            # set true to enable OpenTelemetry distributed tracing
+  otlp_endpoint: ""         # empty defaults to stdout exporter
+  service_name: "optivor"
+  sampling_ratio: 1.0
+
+

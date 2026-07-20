@@ -10,11 +10,19 @@ import (
 )
 
 type Config struct {
-	Server  ServerConfig  `mapstructure:"server"`
-	Storage StorageConfig `mapstructure:"storage"`
-	Cache   CacheConfig   `mapstructure:"cache"`
-	Image   ImageConfig   `mapstructure:"image"`
-	Auth    AuthConfig    `mapstructure:"auth"`
+	Server    ServerConfig    `mapstructure:"server"`
+	Storage   StorageConfig   `mapstructure:"storage"`
+	Cache     CacheConfig     `mapstructure:"cache"`
+	Image     ImageConfig     `mapstructure:"image"`
+	Auth      AuthConfig      `mapstructure:"auth"`
+	Telemetry TelemetryConfig `mapstructure:"telemetry"`
+}
+
+type TelemetryConfig struct {
+	Enabled       bool    `mapstructure:"enabled"`
+	OTLPEndpoint  string  `mapstructure:"otlp_endpoint"`
+	ServiceName   string  `mapstructure:"service_name"`
+	SamplingRatio float64 `mapstructure:"sampling_ratio"`
 }
 
 type ServerConfig struct {
@@ -97,6 +105,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.rate_limit.enabled", true)
 	v.SetDefault("server.rate_limit.rps", 10)
 	v.SetDefault("server.rate_limit.burst", 20)
+	v.SetDefault("telemetry.enabled", false)
+	v.SetDefault("telemetry.service_name", "optivor")
+	v.SetDefault("telemetry.sampling_ratio", 1.0)
 }
 
 // Load reads configuration using Viper and validates required fields.

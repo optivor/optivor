@@ -17,6 +17,7 @@ import (
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/storage"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Server struct {
@@ -94,6 +95,10 @@ func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
+	ctx, span := Tracer().Start(r.Context(), "HTTP GET /image", trace.WithSpanKind(trace.SpanKindServer))
+	defer span.End()
+	r = r.WithContext(ctx)
+
 	start := time.Now()
 	var statusCode = http.StatusOK
 	var formatStr = ""
