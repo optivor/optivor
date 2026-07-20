@@ -123,6 +123,20 @@ Run health and configuration diagnostics:
 ./bin/optivor doctor
 ```
 
+### 8. Inspect Service Logs & Metrics via CLI
+
+Tail systemd service logs:
+
+```bash
+./bin/optivor logs --lines 100 --follow
+```
+
+Scrape and view Prometheus metrics:
+
+```bash
+./bin/optivor metrics
+```
+
 ---
 
 ## Core Principles
