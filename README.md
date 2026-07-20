@@ -144,6 +144,24 @@ Scrape and view Prometheus metrics:
 ./bin/optivor metrics
 ```
 
+### 9. Storage Driver Management via CLI
+
+Install, list, inspect, and remove external storage provider driver binaries:
+
+```bash
+# Install a driver binary with handshake verification
+./bin/optivor driver install /path/to/optivor-driver-r2
+
+# List registered storage drivers
+./bin/optivor driver list
+
+# Inspect driver details
+./bin/optivor driver info r2
+
+# Remove a driver
+./bin/optivor driver remove r2
+```
+
 ---
 
 ## Core Principles
