@@ -43,7 +43,13 @@ This compiles the standalone Go runtime binary to `bin/optivor`.
 
 ### 2. Configure `optivor.yaml`
 
-Create an `optivor.yaml` file in your current working directory:
+Initialize a new `optivor.yaml` configuration file in your current working directory:
+
+```bash
+./bin/optivor init
+```
+
+Or manually create `optivor.yaml`:
 
 ```yaml
 server:
@@ -99,6 +105,14 @@ Optivor exposes Prometheus metrics at `GET /metrics`:
 
 ```bash
 curl -i "http://localhost:8080/metrics"
+```
+
+### 6. Deploying via CLI
+
+Deploy the Optivor service using systemd deployment adapter:
+
+```bash
+./bin/optivor deploy --adapter systemd --dry-run
 ```
 
 ---
