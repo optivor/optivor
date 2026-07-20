@@ -203,3 +203,35 @@ func TestV03Acceptance(t *testing.T) {
 		t.Fatalf("optivor deploy dry-run failed: %v", err)
 	}
 }
+
+func TestV04Acceptance(t *testing.T) {
+	tempDir := t.TempDir()
+	origWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get current working directory: %v", err)
+	}
+	defer func() { _ = os.Chdir(origWd) }()
+	_ = os.Chdir(tempDir)
+
+	// 1. Verify 'optivor init' creates valid optivor.yaml
+	if err := cli.RunInit(false); err != nil {
+		t.Fatalf("optivor init failed: %v", err)
+	}
+
+	cfgPath := filepath.Join(tempDir, "optivor.yaml")
+
+	// 2. Verify 'optivor doctor' health checks
+	if err := cli.RunDoctor(cfgPath); err != nil {
+		t.Fatalf("optivor doctor failed for valid config: %v", err)
+	}
+
+	// 3. Verify 'optivor doctor' fails for invalid config path
+	if err := cli.RunDoctor("nonexistent.yaml"); err == nil {
+		t.Fatalf("expected optivor doctor to fail for nonexistent config")
+	}
+
+	// 4. Verify 'optivor logs' command
+	if err := cli.RunLogs("10", false); err != nil {
+		t.Fatalf("optivor logs failed: %v", err)
+	}
+}
