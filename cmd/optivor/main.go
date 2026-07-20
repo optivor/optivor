@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/optivor/optivor/internal/cache/fs"
+	"github.com/optivor/optivor/internal/cli"
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/server"
@@ -16,10 +17,24 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 {
+		cmd := os.Args[1]
+		if cmd == "init" || cmd == "deploy" || cmd == "help" || cmd == "-v" || cmd == "--version" || cmd == "-h" || cmd == "--help" {
+			if err := cli.Execute(); err != nil {
+				os.Exit(1)
+			}
+			return
+		}
+	}
+
 	configPath := flag.String("config", "", "path to config file (default: ./optivor.yaml)")
 	flag.Parse()
 
-	cfg, err := config.Load(*configPath)
+	runServer(*configPath)
+}
+
+func runServer(configPath string) {
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		slog.Error("Failed to load configuration", "error", err)
 		os.Exit(1)
