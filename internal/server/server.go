@@ -131,7 +131,7 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 
 	// 1. Cache Check
 	if s.cache != nil {
-		cachedData, contentType, hit, cacheErr := s.cache.Get(key, params)
+		cachedData, contentType, hit, cacheErr := s.cache.Get(r.Context(), key, params)
 		if cacheErr != nil {
 			s.logger.Warn("Cache get failed", "key", key, "error", cacheErr)
 		} else if hit {
@@ -181,7 +181,7 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 
 	// 3. Cache Set
 	if s.cache != nil {
-		if cacheErr := s.cache.Set(key, params, data, contentType); cacheErr != nil {
+		if cacheErr := s.cache.Set(r.Context(), key, params, data, contentType); cacheErr != nil {
 			s.logger.Warn("Cache set failed", "key", key, "error", cacheErr)
 		}
 	}
