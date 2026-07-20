@@ -1,6 +1,6 @@
 # CLI Reference
 
-The `optivor` CLI provides commands for scaffolding, deployment, diagnostics, and storage driver management.
+The `optivor` CLI provides commands for scaffolding, deployment, diagnostics, storage driver management, and bucket lifecycle policies.
 
 ## Root Command
 
@@ -28,7 +28,7 @@ optivor deploy [--adapter systemd] [--config optivor.yaml] [--dry-run]
 
 ### `optivor doctor`
 
-Performs health and diagnostic checks on system dependencies, configuration, S3 connectivity, and libvips runtime.
+Performs health and diagnostic checks on system dependencies, configuration, single/multi-bucket connectivity, and libvips runtime.
 
 ```bash
 optivor doctor [--config optivor.yaml]
@@ -55,8 +55,31 @@ optivor metrics [--watch]
 Manages external storage provider driver binaries.
 
 ```bash
-optivor driver install <path>
+# Install driver from local path, github shorthand, or HTTPS release URL
+optivor driver install <path-or-url>
+
+# Examples:
+optivor driver install /usr/local/bin/optivor-driver-r2
+optivor driver install github:optivor/optivor-driver-r2@v1.2.0
+optivor driver install https://github.com/optivor/optivor-driver-r2/releases/download/v1.2.0/optivor-driver-r2-linux-amd64
+
+# Driver management
 optivor driver list
 optivor driver info <name>
 optivor driver remove <name>
+```
+
+### `optivor bucket lifecycle`
+
+Manages retention policies and expiration lifecycle rules across multi-cloud storage buckets.
+
+```bash
+# List active lifecycle rules for a bucket alias
+optivor bucket lifecycle list <alias>
+
+# Apply retention policy with custom expiration TTL
+optivor bucket lifecycle set <alias> [--ttl-days 30] [--rule-file lifecycle.yaml]
+
+# Delete retention lifecycle rules
+optivor bucket lifecycle delete <alias> [--rule-id id] [--all]
 ```
