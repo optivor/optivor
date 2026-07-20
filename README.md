@@ -19,10 +19,10 @@ you already own.
 ---
 
 > [!NOTE]
-> **Signed URLs & Authentication:** Optivor V0.1+ supports HMAC-SHA256 URL signing (`auth.signed_urls.enabled: true`). When enabled, requests require valid `sig` and `expires` query parameters.
+> **Multi-Bucket Routing & Access Control:** Optivor V0.6+ supports multi-bucket declarative routing (`buckets[]`) with per-bucket security policies (`public`, `signed`, `private`) and cross-provider failover chains.
 >
 > [!NOTE]
-> **Automated LRU Cache Eviction:** The filesystem cache automatically performs LRU eviction when disk usage exceeds `cache.fs.max_size_mb` (default: 1024MB).
+> **Signed URLs & Authentication:** HMAC-SHA256 URL signing (`auth.signed_urls.enabled: true`) enforces `sig` and `expires` signatures.
 >
 > [!IMPORTANT]
 > **DoS Protection Notice:** Enforce reasonable `max_width` and `max_height` values in `optivor.yaml` to prevent decompression-bomb attacks.
@@ -43,13 +43,13 @@ This compiles the standalone Go runtime binary to `bin/optivor`.
 
 ### 2. Configure `optivor.yaml`
 
-Initialize a new `optivor.yaml` configuration file in your current working directory:
+Initialize a new `optivor.yaml` configuration file:
 
 ```bash
 ./bin/optivor init
 ```
 
-Or manually create `optivor.yaml`:
+Or configure multi-bucket storage routing:
 
 ```yaml
 server:
@@ -67,13 +67,20 @@ server:
     max_width: 5000   # px DoS limit
     max_height: 5000  # px DoS limit
 
-storage:
-  s3:
-    endpoint: "https://s3.amazonaws.com"
-    bucket: "my-image-bucket"
+buckets:
+  - name: "primary-images"
+    provider: s3
+    endpoint: "https://s3.us-east-1.amazonaws.com"
+    bucket: "my-aws-bucket"
     region: "us-east-1"
-    access_key_id: "YOUR_ACCESS_KEY"
-    secret_access_key: "YOUR_SECRET_KEY"
+    access: public
+
+  - name: "secure-assets"
+    provider: r2
+    endpoint: "https://account-id.r2.cloudflarestorage.com"
+    bucket: "my-r2-bucket"
+    access: signed
+    fallback: "primary-images"
 
 cache:
   fs:
@@ -82,7 +89,7 @@ cache:
 
 telemetry:
   enabled: true
-  otlp_endpoint: ""       # Optional OTLP/gRPC target (e.g., "localhost:4317")
+  otlp_endpoint: ""
   service_name: "optivor"
   sampling_ratio: 1.0
 
@@ -98,15 +105,25 @@ image:
 
 ### 4. Serve Resized & WebP Converted Images
 
-Request any S3 object key with image transformation parameters:
+Request images via single-bucket key or multi-bucket alias:
 
 ```bash
-curl -i "http://localhost:8080/image/products/123/main.jpg?w=300&h=300&fit=cover&format=webp"
+# Multi-bucket alias route
+curl -i "http://localhost:8080/image/primary-images/products/123/main.jpg?w=300&h=300&fit=cover&format=webp"
 ```
 
-Response will return with `Content-Type: image/webp` and header `X-Optivor-Cache: MISS` (or `HIT` on subsequent requests).
+Response returns `Content-Type: image/webp` and `X-Optivor-Cache: MISS` (or `HIT` on subsequent requests).
 
-### 5. Prometheus Metrics
+### 5. Health Check & Diagnostics
+
+Check system health using `/healthz`, `/health`, or `/healtz` endpoints or running `optivor doctor`:
+
+```bash
+curl -i "http://localhost:8080/healthz"
+./bin/optivor doctor
+```
+
+### 6. Prometheus Metrics
 
 Optivor exposes Prometheus metrics at `GET /metrics`:
 
@@ -114,72 +131,40 @@ Optivor exposes Prometheus metrics at `GET /metrics`:
 curl -i "http://localhost:8080/metrics"
 ```
 
-### 6. Deploying via CLI
+### 7. Storage Driver Management via CLI
 
-Deploy the Optivor service using systemd deployment adapter:
-
-```bash
-./bin/optivor deploy --adapter systemd --dry-run
-```
-
-### 7. Diagnostics & Health Check
-
-Run health and configuration diagnostics:
+Install storage provider drivers from local paths, GitHub repository shorthands, or direct release URLs:
 
 ```bash
-./bin/optivor doctor
-```
+# Install driver via GitHub repository shorthand
+./bin/optivor driver install github:optivor/optivor-driver-r2@v1.2.0
 
-### 8. Inspect Service Logs & Metrics via CLI
+# Install driver via direct HTTPS release URL
+./bin/optivor driver install https://github.com/optivor/optivor-driver-r2/releases/download/v1.2.0/optivor-driver-r2-linux-amd64
 
-Tail systemd service logs:
-
-```bash
-./bin/optivor logs --lines 100 --follow
-```
-
-Scrape and view Prometheus metrics:
-
-```bash
-./bin/optivor metrics
-```
-
-### 9. Storage Driver Management via CLI
-
-Install, list, inspect, and remove external storage provider driver binaries:
-
-```bash
-# Install a driver binary with handshake verification
-./bin/optivor driver install /path/to/optivor-driver-r2
-
-# List registered storage drivers
+# List registered drivers
 ./bin/optivor driver list
+```
 
-# Inspect driver details
-./bin/optivor driver info r2
+### 8. Bucket Lifecycle Management via CLI
 
-# Remove a driver
-./bin/optivor driver remove r2
+Manage multi-cloud bucket retention rules:
+
+```bash
+./bin/optivor bucket lifecycle list primary-images
+./bin/optivor bucket lifecycle set primary-images --ttl-days 30
+./bin/optivor bucket lifecycle delete primary-images --all
 ```
 
 ---
 
 ## Core Principles
 
-- **Bring Your Own Storage.** Optivor never stores your images. Your
-  data lives in your bucket, under your account, under your control —
-  always.
-- **Open-source-first, not open-core.** There is no paid tier hiding
-  behind the free one. What you see in this repository is the product.
-- **Provider-agnostic by default.** The runtime works on a plain VM with
-  nothing but a binary and a config file. Cloud-specific deployment is
-  optional convenience layered on top, never a requirement.
-- **Composable, not monolithic.** Storage, transformation, caching, and
-  deployment are independently replaceable. You should be able to swap
-  any one of them without touching the others.
-- **Contributor-first.** You should be able to own an entire piece of
-  this project — a storage driver, a deployment adapter — without
-  needing to understand the whole codebase to do it.
+- **Bring Your Own Storage.** Optivor never stores your images. Your data lives in your bucket, under your account, under your control — always.
+- **Open-source-first, not open-core.** There is no paid tier hiding behind the free one. What you see in this repository is the product.
+- **Provider-agnostic by default.** The runtime works on a plain VM with nothing but a binary and a config file.
+- **Composable, not monolithic.** Storage, transformation, caching, and deployment are independently replaceable.
+- **Contributor-first.** You can own an entire piece of this project — a storage driver, a deployment adapter — without needing to understand the whole codebase.
 
 ---
 
@@ -188,18 +173,16 @@ Install, list, inspect, and remove external storage provider driver binaries:
 ```
 CLI
   ↓
-Runtime
+Runtime (Router & Pipeline)
   ↓
-Storage Drivers
+Storage Drivers (S3, R2, B2, GCS)
   ↓
 Object Storage (yours)
 ```
 
-The runtime knows nothing about cloud providers. Deployment adapters
-know nothing about image processing. Storage drivers know nothing about
-either. Each piece does one job.
+The runtime knows nothing about cloud providers. Deployment adapters know nothing about image processing. Storage drivers know nothing about either. Each piece does one job.
 
-The full reasoning behind these boundaries lives in [`docs/adr/`](./docs/adr).
+Full reasoning lives in [`docs/adr/`](./docs/adr).
 
 ---
 
@@ -208,17 +191,20 @@ The full reasoning behind these boundaries lives in [`docs/adr/`](./docs/adr).
 Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 
 - [Introduction](./docs/wiki/introduction.md) — Framework overview and philosophy
-- [Quick Start Guide](./docs/wiki/quick-start.md) — 5-minute setup with Docker
+- [Quick Start Guide](./docs/wiki/quick-start.md) — Setup with Docker and binary
 - [CLI Reference](./docs/wiki/cli-reference.md) — Command and flag reference
 - [Configuration Reference](./docs/wiki/configuration.md) — `optivor.yaml` schema & environment overrides
-- [Storage Driver Guide](./docs/wiki/storage-drivers.md) — Building custom storage drivers
+- [Multi-Cloud & Multi-Bucket Management](./docs/wiki/multi-cloud-management.md) — Multi-bucket configuration & security policies
+- [Edge Integration Guide](./docs/wiki/edge-integration.md) — CDN and Cloudflare Workers setup
+- [Storage Driver Guide](./docs/wiki/storage-drivers.md) — Building & installing custom storage drivers
+- [Storage Driver SDK Specification](./docs/wiki/driver-sdk-specification.md) — Out-of-process IPC protocol specification
 - [FAQ](./docs/wiki/faq.md) — Frequently asked questions
 
 ---
 
 ## Roadmap
 
-See [`ROADMAP.md`](./ROADMAP.md) for current milestone status and features deferred to post-V0 releases.
+See [`ROADMAP.md`](./ROADMAP.md) for completed milestones and future trajectory.
 
 ## License
 
