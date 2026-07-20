@@ -78,6 +78,13 @@ storage:
 cache:
   fs:
     dir: "/tmp/optivor-cache"
+    max_size_mb: 1024
+
+telemetry:
+  enabled: true
+  otlp_endpoint: ""       # Optional OTLP/gRPC target (e.g., "localhost:4317")
+  service_name: "optivor"
+  sampling_ratio: 1.0
 
 image:
   contain_background_color: "#ffffff"
