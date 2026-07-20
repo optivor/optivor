@@ -38,6 +38,23 @@ Status: ✅ Completed.
 - [x] OpenTelemetry tracing (ADR-0008, stdout + OTLP gRPC)
 - [x] `optivor doctor`, `optivor logs`, `optivor metrics` diagnostics commands
 
+## V0.5 — Docker-First & Provider Agnostic Architecture (Completed)
+
+- [x] Docker-first deployment strategy (ADR-0009) with volume-mounted config and `--provider` flag
+- [x] Provider Registry & driver binary convention (ADR-0010)
+- [x] `optivor driver install` CLI subcommand suite for external driver management
+- [x] Complete documentation wiki (`docs/wiki/`) and developer driver creation guides
+
+## V0.6 — Multi-Provider & Multi-Bucket Management (Planned)
+
+Goal: Manage multiple storage buckets across diverse providers (AWS S3, Cloudflare R2, Backblaze B2, GCS) from a single unified Optivor instance.
+
+- [ ] Multi-bucket routing engine (`internal/storage/router`) mapping bucket identifiers/prefixes to specific driver instances
+- [ ] Declarative multi-bucket configuration schema in `optivor.yaml`
+- [ ] Cross-provider failover and primary/backup bucket fallback policies
+- [ ] Per-bucket metrics and telemetry breakdown in `optivor metrics` and OpenTelemetry spans
+- [ ] CLI multi-bucket verification in `optivor doctor`
+
 ## V1 — Extension points
 
 - Storage Driver interface finalized and documented for external
