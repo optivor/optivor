@@ -93,6 +93,14 @@ curl -i "http://localhost:8080/image/products/123/main.jpg?w=300&h=300&fit=cover
 
 Response will return with `Content-Type: image/webp` and header `X-Optivor-Cache: MISS` (or `HIT` on subsequent requests).
 
+### 5. Prometheus Metrics
+
+Optivor exposes Prometheus metrics at `GET /metrics`:
+
+```bash
+curl -i "http://localhost:8080/metrics"
+```
+
 ---
 
 ## Core Principles
