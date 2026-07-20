@@ -115,6 +115,14 @@ Deploy the Optivor service using systemd deployment adapter:
 ./bin/optivor deploy --adapter systemd --dry-run
 ```
 
+### 7. Diagnostics & Health Check
+
+Run health and configuration diagnostics:
+
+```bash
+./bin/optivor doctor
+```
+
 ---
 
 ## Core Principles
