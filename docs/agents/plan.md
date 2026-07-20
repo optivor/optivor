@@ -1591,7 +1591,7 @@ git rebase staging   # merge değil, rebase
 | ADR-0007 | CLI Design | ✅ V0.3 (tamamlandı) |
 | ADR-0008 | OpenTelemetry Tracing | ✅ V0.4 (tamamlandı) |
 | ADR-0009 | Docker-First Deployment | ✅ Accepted |
-| ADR-0010 | Provider Registry & Driver Convention | 📋 V0.5 |
+| ADR-0010 | Provider Registry & Driver Convention | ✅ Accepted |
 
 ---
 
