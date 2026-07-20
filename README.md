@@ -107,6 +107,14 @@ Optivor exposes Prometheus metrics at `GET /metrics`:
 curl -i "http://localhost:8080/metrics"
 ```
 
+### 6. Deploying via CLI
+
+Deploy the Optivor service using systemd deployment adapter:
+
+```bash
+./bin/optivor deploy --adapter systemd --dry-run
+```
+
 ---
 
 ## Core Principles
