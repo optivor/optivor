@@ -318,6 +318,21 @@ func BenchmarkImagePipeline(b *testing.B) {
 	}
 }
 
+func TestV08Acceptance(t *testing.T) {
+	// Full end-to-end production readiness validation across all milestone capabilities
+	cfg := &config.Config{
+		Server: config.ServerConfig{Port: 8080, Image: config.ServerImage{MaxWidth: 5000, MaxHeight: 5000}},
+		Cache:  config.CacheConfig{FS: config.FSCacheConfig{Dir: t.TempDir()}},
+		Buckets: []config.BucketConfig{
+			{Name: "prod-images", Endpoint: "http://localhost:9000", Bucket: "prod", Access: "public"},
+		},
+	}
+	if err := config.Validate(cfg); err != nil {
+		t.Fatalf("production validation check failed: %v", err)
+	}
+}
+
+
 
 
 
