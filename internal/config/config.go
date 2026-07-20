@@ -22,6 +22,8 @@ type ServerConfig struct {
 	ReadTimeout    time.Duration   `mapstructure:"read_timeout"`
 	WriteTimeout   time.Duration   `mapstructure:"write_timeout"`
 	RequestTimeout time.Duration   `mapstructure:"request_timeout"`
+	LogLevel       string          `mapstructure:"log_level"`
+	LogFormat      string          `mapstructure:"log_format"`
 	Image          ServerImage     `mapstructure:"image"`
 	RateLimit      RateLimitConfig `mapstructure:"rate_limit"`
 }
@@ -80,6 +82,8 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.read_timeout", 30*time.Second)
 	v.SetDefault("server.write_timeout", 30*time.Second)
 	v.SetDefault("server.request_timeout", 30*time.Second)
+	v.SetDefault("server.log_level", "info")
+	v.SetDefault("server.log_format", "text")
 	v.SetDefault("server.image.max_width", 5000)
 	v.SetDefault("server.image.max_height", 5000)
 	v.SetDefault("cache.fs.dir", "/tmp/optivor-cache")

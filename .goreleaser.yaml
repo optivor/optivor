@@ -35,3 +35,18 @@ checksum:
 
 snapshot:
   version_template: "{{ .Tag }}-next"
+
+nfpms:
+  - id: optivor-nfpms
+    package_name: optivor
+    vendor: Optivor
+    homepage: "https://github.com/optivor/optivor"
+    maintainer: "Optivor Maintainers"
+    description: "Production-grade image infrastructure framework"
+    license: Apache-2.0
+    formats:
+      - deb
+      - rpm
+    files:
+      "deploy/systemd/optivor.service": "/lib/systemd/system/optivor.service"
+      "optivor.yaml.example": "/etc/optivor/optivor.yaml.example"
