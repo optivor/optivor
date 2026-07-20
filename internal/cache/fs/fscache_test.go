@@ -2,6 +2,7 @@ package fs_test
 
 import (
 	"bytes"
+	"context"
 	"testing"
 	"time"
 
@@ -16,6 +17,8 @@ func TestFSCache_SetAndGet(t *testing.T) {
 		t.Fatalf("failed to create FSCache: %v", err)
 	}
 
+	ctx := context.Background()
+
 	params := pipeline.TransformParams{
 		Width:  100,
 		Height: 100,
@@ -28,7 +31,7 @@ func TestFSCache_SetAndGet(t *testing.T) {
 	ct := "image/webp"
 
 	// Initial Get should be cache miss
-	_, _, hit, err := cacheStore.Get(key, params)
+	_, _, hit, err := cacheStore.Get(ctx, key, params)
 	if err != nil {
 		t.Fatalf("unexpected error on get: %v", err)
 	}
@@ -37,12 +40,12 @@ func TestFSCache_SetAndGet(t *testing.T) {
 	}
 
 	// Set cache entry
-	if err := cacheStore.Set(key, params, content, ct); err != nil {
+	if err := cacheStore.Set(ctx, key, params, content, ct); err != nil {
 		t.Fatalf("failed to set cache: %v", err)
 	}
 
 	// Second Get should be cache hit
-	retData, retCT, hit, err := cacheStore.Get(key, params)
+	retData, retCT, hit, err := cacheStore.Get(ctx, key, params)
 	if err != nil {
 		t.Fatalf("unexpected error on get after set: %v", err)
 	}
@@ -66,6 +69,8 @@ func TestFSCache_LRUEviction(t *testing.T) {
 		t.Fatalf("failed to create FSCache: %v", err)
 	}
 
+	ctx := context.Background()
+
 	ct := "image/jpeg"
 	data := []byte("12345678901234567890") // 20 bytes payload + ~11 bytes header = 31 bytes per entry
 
@@ -75,22 +80,22 @@ func TestFSCache_LRUEviction(t *testing.T) {
 	p4 := pipeline.TransformParams{Width: 40}
 
 	// Insert 4 entries (4 * ~31 bytes = ~124 bytes > 100 bytes limit)
-	_ = cacheStore.Set("img1", p1, data, ct)
+	_ = cacheStore.Set(ctx, "img1", p1, data, ct)
 	time.Sleep(10 * time.Millisecond)
-	_ = cacheStore.Set("img2", p2, data, ct)
+	_ = cacheStore.Set(ctx, "img2", p2, data, ct)
 	time.Sleep(10 * time.Millisecond)
-	_ = cacheStore.Set("img3", p3, data, ct)
+	_ = cacheStore.Set(ctx, "img3", p3, data, ct)
 	time.Sleep(10 * time.Millisecond)
-	_ = cacheStore.Set("img4", p4, data, ct)
+	_ = cacheStore.Set(ctx, "img4", p4, data, ct)
 
 	// Oldest entry (img1) should have been evicted
-	_, _, hit1, _ := cacheStore.Get("img1", p1)
+	_, _, hit1, _ := cacheStore.Get(ctx, "img1", p1)
 	if hit1 {
 		t.Error("expected img1 to be evicted by LRU")
 	}
 
 	// Latest entry (img4) must still exist
-	_, _, hit4, _ := cacheStore.Get("img4", p4)
+	_, _, hit4, _ := cacheStore.Get(ctx, "img4", p4)
 	if !hit4 {
 		t.Error("expected img4 to remain in cache")
 	}

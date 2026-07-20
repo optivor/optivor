@@ -14,7 +14,7 @@ Per ADR-0002, the runtime layer (`internal/server`) handles HTTP routing and req
 
 1. **Signature Scheme**: Optivor adopts HMAC-SHA256 signature verification via HTTP query parameters:
    - `expires`: Unix timestamp (in seconds) after which the request is invalid.
-   - `sig`: Hex-encoded HMAC-SHA256 hash of `path + "?expires=" + expires` signed using `auth.signed_urls.secret`.
+   - `sig`: Hex-encoded HMAC-SHA256 hash of `path + "?" + query.Encode()` (excluding `sig`) signed using `auth.signed_urls.secret`. This ensures tamper-proofing across all request transformation parameters (`w`, `h`, `fit`, `format`).
 
 2. **Configuration**:
    - `auth.signed_urls.enabled` (boolean, default: `false` for backward compatibility with V0).

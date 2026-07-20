@@ -66,7 +66,8 @@ func RunDoctor(configPath string) error {
 
 	// Check 4: libvips runtime initialization check
 	vips.Startup(nil)
-	fmt.Println("  ✅ libvips image engine initialized successfully")
+	defer vips.Shutdown()
+	fmt.Printf("  ✅ libvips %s initialized successfully\n", vips.Version)
 
 	if hasErrors {
 		return fmt.Errorf("doctor check completed with errors")
