@@ -20,6 +20,30 @@ point, also read
 and
 [`docs/adr/0003-extensibility-model.md`](./docs/adr/0003-extensibility-model.md).
 
+## Local Development Setup
+
+### Prerequisites
+
+- **Go**: 1.25 or higher
+- **System Dependencies**:
+  - Ubuntu/Debian: `sudo apt-get install -y libvips-dev libheif-dev`
+  - macOS: `brew install vips libheif`
+
+### Building & Testing
+
+```bash
+# Compile binary
+make build
+
+# Run unit and integration tests
+go test ./... -v -race -cover
+
+# Run static analysis
+go vet ./...
+golangci-lint run
+govulncheck ./...
+```
+
 ## You can own a subsystem, not the whole codebase
 
 Optivor is deliberately split into layers with narrow boundaries (CLI,
