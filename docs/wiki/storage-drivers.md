@@ -32,3 +32,13 @@ optivor driver install /path/to/optivor-driver-r2
 ```
 
 The CLI executes `--optivor-handshake`, validates the JSON response, and registers the driver in `~/.config/optivor/drivers.json`.
+
+## Developer Guide Series
+
+For a complete step-by-step guide to developing, testing, and contributing a custom provider driver:
+
+1. [Architecture & Specification Overview](./developer-driver-overview.md)
+2. [Step-by-Step Implementation Guide](./developer-driver-guide.md)
+3. [Testing & Local Verification](./developer-driver-testing.md)
+4. [Submission & Registry Contribution](./developer-driver-submission.md)
+
