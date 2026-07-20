@@ -847,7 +847,7 @@ git push origin v0.3.0
 
 ---
 
-## 📋 V0.4 — Observability
+## ✅ V0.4 — Observability (TAMAMLANDI)
 
 **ROADMAP.md hedefleri:**
 - OpenTelemetry tracing
@@ -1096,12 +1096,431 @@ git push origin v0.4.0
 
 | Özellik | Hedef |
 |---|---|
+| Docker-first deployment | V0.5 |
+| Provider Registry & driver convention | V0.5 |
+| `optivor driver install` CLI subcommand | V0.5 |
+| docs/wiki/ tam yapısı | V0.5 |
 | Storage Driver interface finalize / dış katkı dokümantasyonu | V1 |
 | Runtime Module mechanism ADR | V1 |
 | Ek Deployment Adapter'lar (Fly.io, Cloudflare, AWS, Kubernetes) | V1 |
 | Dashboard / web UI | Planlanmadı |
 | AI-based transformations | Planlanmadı |
 | Multi-node / horizontally scaled runtime | Planlanmadı |
+
+---
+
+## 📋 V0.5 — Docker-First + Provider Agnostik Mimari
+
+**ROADMAP.md hedefleri:**
+- Docker birincil dağıtım mekanizması (`make install` / systemd kaldırılmıyor, Docker ekleniyor)
+- `optivor.yaml` volume mount ile container'a verilir; `OPTIVOR_*` env var'ları override sağlar
+- Container `--provider <name>` parametresiyle başlatılabilir (ör. `--provider r2`, `--provider minio`)
+- Provider-özel kod core repoya girmez — ayrı repo convention'ı (ADR-0010)
+- `optivor driver install <driver-binary>` CLI subcommand
+- docs/wiki/ tam dokümantasyon yapısı
+- docs/architecture/ eksik dosyalar eklenir
+- CI: golangci-lint-action@v6 yükseltmesi
+
+**Mimari ilke:** Core repo hiçbir provider'a (R2, B2, Backblaze…) özel kod içermez.
+Provider driver'ları `optivor-driver-<name>` konvansiyonuyla ayrı repolarda yaşar.
+CLI, bu driver binary'lerini `optivor driver install` ile kaydeder.
+
+---
+
+### V0.5 Adım Sırası
+
+---
+
+#### Adım W — CI Fix: golangci-lint-action@v6
+
+> **Ön koşul:** Yok — V0.4 tamamlanmış, `main`'de `v0.4.0` tagı var.
+> Bu adım diğer V0.5 adımlarıyla paralel açılabilir; CI sağlığı için önce merge edilmesi önerilir.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b chore/ci-upgrade-golangci-lint
+```
+
+**Commit sırası:**
+
+```
+chore(ci): upgrade golangci-lint-action from v4 to v6
+
+Node 20 deprecated on GitHub Actions runners (2025-09-19).
+golangci-lint-action@v6 uses Node 24. Pins lint version to v2.1.6.
+
+chore(ci): fix go-version from 1.25 to 1.24
+
+Go 1.25 does not exist; corrects typo introduced in previous CI config.
+```
+
+**Değişiklikler (`.github/workflows/ci.yml`):**
+- `golangci/golangci-lint-action@v4` → `golangci/golangci-lint-action@v6`
+- `version: latest` → `version: v2.1.6`
+- `go-version: '1.25'` → `go-version: '1.24'`
+
+**PR:**
+```bash
+git push -u origin chore/ci-upgrade-golangci-lint
+gh pr create --base staging \
+  --title "chore(ci): upgrade golangci-lint-action to v6, fix go-version" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### Adım X — ADR-0009: Docker-First Deployment
+
+> **Ön koşul:** Yok — Adım W ile paralel açılabilir.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b docs/adr-0009-docker-first
+```
+
+**ADR-0009 kapsamı:**
+- Docker, V0.5 itibarıyla birincil dağıtım mekanizmasıdır
+- systemd adapter **deprecated değil** — `make install` korunur, Docker ek seçenek olarak eklenir
+- `optivor.yaml` container'a **volume mount** ile verilir: `-v ./optivor.yaml:/etc/optivor/optivor.yaml:ro`
+- `OPTIVOR_*` env var'ları config değerlerini override eder (secret'lar için)
+- `--provider <name>` Docker başlatma parametresi: hangi storage provider'ının aktif olduğunu bildirir
+- Referans `docker-compose.yml` proje köküne eklenir
+- `HEALTHCHECK` Dockerfile'a eklenir (`/healthz` endpoint'i üzerinden)
+
+**Commit:**
+```
+docs(adr): add ADR-0009 for Docker-first deployment strategy
+```
+
+**PR:**
+```bash
+git push -u origin docs/adr-0009-docker-first
+gh pr create --base staging \
+  --title "docs(adr): add ADR-0009 Docker-first deployment" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### Adım Y — Dockerfile + docker-compose + Makefile Docker Hedefleri
+
+> **Ön koşul:** ADR-0009 (Adım X) merge edilmiş olmalı.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b feat/docker-first-deployment
+```
+
+**Commit sırası:**
+
+```
+feat(docker): add default CMD and HEALTHCHECK to Dockerfile
+
+Sets CMD ["-config", "/etc/optivor/optivor.yaml"] so the image works
+out-of-the-box with a volume-mounted config. Adds HEALTHCHECK against
+/healthz with 30s interval.
+
+feat(docker): add reference docker-compose.yml to project root
+
+Shows volume-mount pattern for optivor.yaml and env-var secret override.
+Includes minio service for local S3-compatible development.
+
+feat(server): add --provider startup flag for storage driver selection
+
+Allows 'docker run optivor --provider r2' to override the storage
+driver at container startup. Falls back to config file if flag not set.
+Unknown provider causes exit 1 with clear error message.
+
+chore(makefile): add docker-build and docker-run targets
+
+Preserves existing make install (systemd). Adds:
+  make docker-build — builds optivor:latest image
+  make docker-run   — runs with ./optivor.yaml mounted to /etc/optivor/
+
+docs(deployment): add docs/deployment/docker.md guide
+```
+
+**docker-compose.yml referans yapısı:**
+```yaml
+services:
+  optivor:
+    image: optivor:latest
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./optivor.yaml:/etc/optivor/optivor.yaml:ro
+    environment:
+      - OPTIVOR_STORAGE_S3_SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY}
+      - OPTIVOR_AUTH_SECRET=${AUTH_SECRET}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+```
+
+**`--provider` flag davranışı:**
+| Değer | Etki |
+|---|---|
+| Verilmezse | Config dosyasındaki `storage.driver` alanı kullanılır |
+| `--provider s3` | `storage.driver: s3` override |
+| `--provider r2` | `storage.driver: r2` override (driver yüklü olmalı) |
+| Bilinmeyen provider | Startup'ta hata + `exit 1` |
+
+**PR:**
+```bash
+git push -u origin feat/docker-first-deployment
+gh pr create --base staging \
+  --title "feat(docker): Docker-first deployment with volume-mounted config and --provider flag" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### Adım Z — ADR-0010: Provider Registry & Driver Convention
+
+> **Ön koşul:** Yok — Adım X ve Y ile paralel açılabilir.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b docs/adr-0010-provider-registry
+```
+
+**ADR-0010 kapsamı:**
+- Core Optivor reposunda **hiçbir provider-özel kod olmaz**
+  - S3-uyumlu driver core'da kalır (S3 API'si evrensel interface'dir — MinIO, R2, B2 hepsi bunu konuşur)
+  - R2/B2/Backblaze'e **özel deneyimler** (Cloudflare API entegrasyonu, B2 lifecycle yönetimi vb.) ayrı repoya gider
+- Community driver'lar `optivor-driver-<name>` konvansiyonunu izler
+  - Örnek: `optivor-driver-r2`, `optivor-driver-b2`
+- Driver'lar ayrı Go binary'leri olarak derlenir (Terraform provider pattern)
+- CLI `optivor driver install <path>` ile driver'ı kaydeder
+- Driver registry: `~/.config/optivor/drivers.json`
+- Core CLI, driver binary'sini subprocess olarak çağırır (ADR-0003 §out-of-process prensibi)
+- Driver binary'ler `--optivor-handshake` flag'iyle metadata döner:
+  ```json
+  {"name": "r2", "version": "0.1.0", "optivor_api": "v1"}
+  ```
+
+**Commit:**
+```
+docs(adr): add ADR-0010 for provider registry and driver binary convention
+
+Formalizes that core repo contains no provider-specific code beyond the
+universal S3-compatible driver. Community providers ship as separate
+binaries following the optivor-driver-<name> naming convention.
+```
+
+**PR:**
+```bash
+git push -u origin docs/adr-0010-provider-registry
+gh pr create --base staging \
+  --title "docs(adr): add ADR-0010 provider registry and driver convention" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### Adım AA — CLI `optivor driver` Subcommand İskeleti
+
+> **Ön koşul:** ADR-0010 (Adım Z) merge edilmiş olmalı.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b feat/cli-driver-subcommand
+```
+
+**`optivor driver` subcommand'ları:**
+
+| Komut | Açıklama |
+|---|---|
+| `optivor driver install <path-or-url>` | Driver binary'yi kaydeder, handshake doğrular |
+| `optivor driver list` | Kayıtlı driver'ları listeler (name, version, path) |
+| `optivor driver remove <name>` | Driver kaydını kaldırır |
+| `optivor driver info <name>` | Driver metadata'sını gösterir |
+
+**Commit sırası:**
+
+```
+feat(cli): add 'optivor driver' subcommand group with cobra
+
+feat(cli/driver): implement 'driver install' with handshake validation
+
+feat(cli/driver): implement 'driver list', 'driver remove', 'driver info'
+
+test(cli/driver): add table-driven tests for all driver subcommands
+
+docs(readme): document 'optivor driver' subcommand usage and convention
+```
+
+**PR:**
+```bash
+git push -u origin feat/cli-driver-subcommand
+gh pr create --base staging \
+  --title "feat(cli): add 'optivor driver' subcommand for provider driver management" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### Adım AB — docs/wiki/ + docs/architecture/ Eksik Dosyalar
+
+> **Ön koşul:** Adım Y (Docker) ve Z (provider convention) merge edilmiş olmalı.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b docs/wiki-and-architecture
+```
+
+**Oluşturulacak dosyalar:**
+
+```
+docs/
+  wiki/
+    introduction.md     — Optivor nedir / ne değildir, hedef kitle
+    quick-start.md      — Docker ile 5 dakikada çalıştırma (volume mount flow)
+    cli-reference.md    — Tüm CLI komutları ve flag'leri
+    configuration.md    — optivor.yaml tam şema referansı + env override'lar
+    storage-drivers.md  — Driver yazma rehberi (ADR-0010 konvansiyonu)
+    faq.md              — Sık sorulan sorular
+  architecture/
+    providers.md        — Provider ekosistemi, neden core'da provider kodu olmaz
+    docker.md           — Docker-first mimari, config injection, --provider flag
+```
+
+**Commit sırası:**
+
+```
+docs(wiki): add introduction, quick-start, and faq
+
+docs(wiki): add cli-reference — complete command and flag documentation
+
+docs(wiki): add configuration — full optivor.yaml schema reference
+
+docs(wiki): add storage-drivers — driver development guide (ADR-0010)
+
+docs(architecture): add providers.md and docker.md
+
+docs(readme): add "Documentation" section linking to docs/wiki/
+```
+
+**PR:**
+```bash
+git push -u origin docs/wiki-and-architecture
+gh pr create --base staging \
+  --title "docs: add docs/wiki/ full structure and docs/architecture/ missing files" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### Adım AC — V0.5 E2E Kabul Testi
+
+> **Ön koşul:** W–AB'nin tamamı merge edilmiş olmalı.
+
+```bash
+git checkout staging && git pull origin staging
+git checkout -b test/v05-e2e-acceptance
+```
+
+**Commit:**
+```
+test(e2e): add V0.5 acceptance tests for Docker and driver subcommand
+
+Covers: Docker healthcheck pass with volume-mounted config,
+--provider flag unknown-value exit-1, 'optivor driver install/list/remove'
+round-trip, CI golangci-lint @v6 Node 20 warning absent.
+```
+
+**Test senaryoları:**
+- `docker run --rm -v ./optivor.yaml.example:/etc/optivor/optivor.yaml optivor:latest doctor` → çıkış kodu 0 ✓
+- `/healthz` Docker HEALTHCHECK → `200 OK` ✓
+- `optivor --provider unknown-xyz` → `exit 1`, anlamlı hata mesajı ✓
+- `optivor driver install ./testdata/fake-driver` → kaydedildi ✓
+- `optivor driver list` → fake-driver görünüyor ✓
+- `optivor driver remove fake` → listeden silindi ✓
+- CI: golangci-lint @v6 ile Node 20 uyarısı yok ✓
+
+**PR:**
+```bash
+git push -u origin test/v05-e2e-acceptance
+gh pr create --base staging \
+  --title "test(e2e): V0.5 acceptance test suite" \
+  --body-file .github/PULL_REQUEST_TEMPLATE.md
+```
+
+---
+
+#### V0.5 Release
+
+```bash
+git checkout staging && git pull origin staging
+gh pr create \
+  --base main \
+  --head staging \
+  --title "release: promote staging → main (v0.5.0)" \
+  --body "V0.5 milestone: Docker-first deployment (ADR-0009), provider driver convention (ADR-0010), optivor driver subcommand, docs/wiki/ structure, CI golangci-lint@v6."
+
+# Merge sonrası:
+git checkout main && git pull origin main
+git tag v0.5.0
+git push origin v0.5.0
+```
+
+---
+
+### V0.5 Kapsam Dışı
+
+| Özellik | Hedef |
+|---|---|
+| Storage Driver API formal spec / dış katkı dokümantasyonu | V1 |
+| Runtime Module mechanism ADR | V1 |
+| Provider driver index/registry servisi | V1+ |
+| Ek Deployment Adapter'lar (Fly.io, Cloudflare, Kubernetes) | V1 |
+| Dashboard / web UI | Planlanmadı |
+| AI-based transformations | Planlanmadı |
+
+---
+
+## 📋 V1 — Extension Points (Taslak)
+
+**ROADMAP.md hedefleri:**
+- Storage Driver interface finalized ve harici katkılar için dokümante edilmiş
+- Runtime Module mechanism karar verilmiş (ADR-0003'te intentionally open bırakıldı)
+- Ek Deployment Adapter'lar (Cloudflare, AWS, Kubernetes)
+- Provider Registry production-ready (`optivor driver install` stable API)
+
+**V0.5'ten devralınan borçlar:**
+- ADR-0010 driver handshake → semantic versioning + signature verification
+- ADR-0005 Storage Driver API formal spec (dış contributor'lara açık)
+- İlk resmi community driver referansı (ör. `optivor-driver-r2` ayrı repo)
+
+> **Not:** V1 adım sırası V0.5 tamamlandıktan sonra bu belgeye eklenir.
+> Şu anki taslak, scope'u sabitlemek içindir.
+
+---
+
+#### V1 Adım Taslağı (detay sonra)
+
+```
+Adım AD — ADR-0005 Revision: Storage Driver API formal spec + driver SDK
+Adım AE — Runtime Module mechanism ADR (in-process vs WASM benchmark)
+Adım AF — Kubernetes Helm chart deployment adapter
+Adım AG — Fly.io deployment adapter
+Adım AH — Cloudflare proxy-mode adapter (ADR-0002 proxy kategori)
+Adım AI — V1 E2E kabul testi
+V1 Release → v1.0.0
+```
 
 ---
 
@@ -1171,6 +1590,8 @@ git rebase staging   # merge değil, rebase
 | ADR-0006 | Deployment Adapter | ✅ V0.2 (tamamlandı) |
 | ADR-0007 | CLI Design | ✅ V0.3 (tamamlandı) |
 | ADR-0008 | OpenTelemetry Tracing | ✅ V0.4 (tamamlandı) |
+| ADR-0009 | Docker-First Deployment | 📋 V0.5 |
+| ADR-0010 | Provider Registry & Driver Convention | 📋 V0.5 |
 
 ---
 
