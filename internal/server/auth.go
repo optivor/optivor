@@ -13,6 +13,7 @@ import (
 )
 
 // GenerateSignature creates a hex-encoded HMAC-SHA256 signature for a given URL path and query values.
+// The signature input is constructed as path + "?" + query.Encode() (excluding any existing 'sig' parameter).
 func GenerateSignature(path string, query url.Values, secret string) string {
 	q := make(url.Values)
 	for k, v := range query {
