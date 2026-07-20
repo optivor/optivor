@@ -265,3 +265,25 @@ func TestV05Acceptance(t *testing.T) {
 	}
 }
 
+func TestV06Acceptance(t *testing.T) {
+	// 1. Verify multi-bucket config validation
+	cfg := &config.Config{
+		Server: config.ServerConfig{Port: 8080, Image: config.ServerImage{MaxWidth: 100, MaxHeight: 100}},
+		Cache:  config.CacheConfig{FS: config.FSCacheConfig{Dir: t.TempDir()}},
+		Buckets: []config.BucketConfig{
+			{Name: "public-bucket", Endpoint: "http://localhost:9000", Bucket: "b1", Access: "public"},
+			{Name: "signed-bucket", Endpoint: "http://localhost:9000", Bucket: "b2", Access: "signed"},
+			{Name: "private-bucket", Endpoint: "http://localhost:9000", Bucket: "b3", Access: "private"},
+		},
+	}
+
+	if err := config.Validate(cfg); err != nil {
+		t.Fatalf("expected valid multi-bucket config, got: %v", err)
+	}
+
+	if len(cfg.Buckets) != 3 {
+		t.Errorf("expected 3 buckets, got %d", len(cfg.Buckets))
+	}
+}
+
+
