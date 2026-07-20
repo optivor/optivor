@@ -1,0 +1,21 @@
+[Unit]
+Description=Optivor Image Infrastructure Service
+After=network.target
+
+[Service]
+Type=simple
+User=optivor
+Group=optivor
+WorkingDirectory=/etc/optivor
+ExecStart=/usr/local/bin/optivor -config /etc/optivor/optivor.yaml
+Restart=always
+RestartSec=5s
+LimitNOFILE=65536
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
