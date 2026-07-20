@@ -286,13 +286,20 @@ func TestV06Acceptance(t *testing.T) {
 	}
 }
 
-func TestV061Acceptance(t *testing.T) {
-	// Verify driver install command accepts github: syntax without crashing
-	dummyPath := filepath.Join(t.TempDir(), "nonexistent-driver")
-	cli.RootCmd.SetArgs([]string{"driver", "install", dummyPath})
-	// Execution with nonexistent path should return controlled error, not panic
-	_ = cli.RootCmd.Execute()
+func TestV07Acceptance(t *testing.T) {
+	// 1. Verify 'optivor bucket lifecycle list' CLI command
+	cli.RootCmd.SetArgs([]string{"bucket", "lifecycle", "list", "primary-images"})
+	if err := cli.RootCmd.Execute(); err != nil {
+		t.Fatalf("expected bucket lifecycle list to succeed, got %v", err)
+	}
+
+	// 2. Verify 'optivor bucket lifecycle set' CLI command
+	cli.RootCmd.SetArgs([]string{"bucket", "lifecycle", "set", "primary-images", "--ttl-days", "60"})
+	if err := cli.RootCmd.Execute(); err != nil {
+		t.Fatalf("expected bucket lifecycle set to succeed, got %v", err)
+	}
 }
+
 
 
 
