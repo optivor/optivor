@@ -300,6 +300,25 @@ func TestV07Acceptance(t *testing.T) {
 	}
 }
 
+func BenchmarkImagePipeline(b *testing.B) {
+	testKey := "benchmark/test.jpg"
+	sourceJPEG := createTestJPEG(1000, 1000)
+	memStorage := &memoryStorageDriver{
+		objects: map[string][]byte{testKey: sourceJPEG},
+	}
+	pipe := pipeline.NewPipeline()
+	params := pipeline.TransformParams{Width: 200, Height: 200, Fit: pipeline.FitCover, Format: "webp"}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _, err := pipe.Run(context.Background(), memStorage, testKey, params)
+		if err != nil {
+			b.Fatalf("benchmark failed: %v", err)
+		}
+	}
+}
+
+
 
 
 
