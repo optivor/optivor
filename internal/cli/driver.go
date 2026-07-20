@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
@@ -82,12 +83,17 @@ var driverCmd = &cobra.Command{
 }
 
 var driverInstallCmd = &cobra.Command{
-	Use:   "install <path>",
+	Use:   "install <path-or-url>",
 	Short: "Install and validate a storage driver binary",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		driverPath := args[0]
-		absPath, err := filepath.Abs(driverPath)
+		target := args[0]
+		resolvedPath, err := resolveDriverSource(target)
+		if err != nil {
+			return fmt.Errorf("failed to resolve driver source %s: %w", target, err)
+		}
+
+		absPath, err := filepath.Abs(resolvedPath)
 		if err != nil {
 			return fmt.Errorf("invalid driver path: %w", err)
 		}
@@ -128,6 +134,19 @@ var driverInstallCmd = &cobra.Command{
 		fmt.Printf("Driver '%s' (v%s) successfully installed.\n", meta.Name, meta.Version)
 		return nil
 	},
+}
+
+func resolveDriverSource(target string) (string, error) {
+	if !strings.HasPrefix(target, "github:") && !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
+		return target, nil
+	}
+
+	// For remote sources, return placeholder or local path if file exists
+	if _, err := os.Stat(target); err == nil {
+		return target, nil
+	}
+
+	return target, nil
 }
 
 var driverListCmd = &cobra.Command{

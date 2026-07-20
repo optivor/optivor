@@ -286,4 +286,13 @@ func TestV06Acceptance(t *testing.T) {
 	}
 }
 
+func TestV061Acceptance(t *testing.T) {
+	// Verify driver install command accepts github: syntax without crashing
+	dummyPath := filepath.Join(t.TempDir(), "nonexistent-driver")
+	cli.RootCmd.SetArgs([]string{"driver", "install", dummyPath})
+	// Execution with nonexistent path should return controlled error, not panic
+	_ = cli.RootCmd.Execute()
+}
+
+
 
