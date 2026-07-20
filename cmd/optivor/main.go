@@ -19,7 +19,7 @@ import (
 func main() {
 	if len(os.Args) > 1 {
 		cmd := os.Args[1]
-		if cmd == "init" || cmd == "deploy" || cmd == "help" || cmd == "-v" || cmd == "--version" || cmd == "-h" || cmd == "--help" {
+		if cmd == "init" || cmd == "deploy" || cmd == "doctor" || cmd == "logs" || cmd == "metrics" || cmd == "help" || cmd == "-v" || cmd == "--version" || cmd == "-h" || cmd == "--help" {
 			if err := cli.Execute(); err != nil {
 				os.Exit(1)
 			}
