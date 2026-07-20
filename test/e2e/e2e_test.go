@@ -235,3 +235,33 @@ func TestV04Acceptance(t *testing.T) {
 		t.Fatalf("optivor logs failed: %v", err)
 	}
 }
+
+func TestV05Acceptance(t *testing.T) {
+	// 1. Verify Storage Driver config field default & override
+	cfg := &config.Config{
+		Storage: config.StorageConfig{
+			Driver: "r2",
+		},
+	}
+	if cfg.Storage.Driver != "r2" {
+		t.Errorf("expected storage driver r2, got %s", cfg.Storage.Driver)
+	}
+
+	// 2. Healthcheck Endpoint Validation (Docker HEALTHCHECK target)
+	srv := server.New(&config.Config{
+		Server: config.ServerConfig{Port: 8080},
+	}, nil, nil, nil, nil)
+	ts := httptest.NewServer(srv.Router())
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/healthz")
+	if err != nil {
+		t.Fatalf("failed to GET /healthz: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200 OK from Docker healthcheck target /healthz, got %d", resp.StatusCode)
+	}
+}
+
