@@ -132,3 +132,37 @@ func TestEndToEnd_DefinitionOfDone(t *testing.T) {
 		t.Fatalf("expected output image size 200x200, got %dx%d", vipsImg.Width(), vipsImg.Height())
 	}
 }
+
+func TestV02Acceptance(t *testing.T) {
+	cfg := &config.Config{
+		Server: config.ServerConfig{
+			Port:      8080,
+			LogLevel:  "info",
+			LogFormat: "json",
+		},
+	}
+
+	// 1. JSON Logging Output Test
+	var logBuf bytes.Buffer
+	logger := server.NewLogger(cfg, &logBuf)
+	srv := server.New(cfg, nil, nil, nil, logger)
+
+	ts := httptest.NewServer(srv.Router())
+	defer ts.Close()
+
+	// 2. /metrics Endpoint Test
+	resp, err := http.Get(ts.URL + "/metrics")
+	if err != nil {
+		t.Fatalf("failed to GET /metrics: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200 OK from /metrics, got %d", resp.StatusCode)
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	if !bytes.Contains(body, []byte("optivor_cache_hits_total")) {
+		t.Errorf("expected /metrics to contain optivor_cache_hits_total, got: %s", string(body))
+	}
+}
