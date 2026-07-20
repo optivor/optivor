@@ -7,6 +7,7 @@ import (
 
 	"github.com/optivor/optivor/internal/config"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -23,9 +24,23 @@ func InitTracer(cfg *config.Config, out io.Writer) (*sdktrace.TracerProvider, er
 		return tp, nil
 	}
 
-	exporter, err := stdouttrace.New(stdouttrace.WithWriter(out))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create stdout trace exporter: %w", err)
+	var exporter sdktrace.SpanExporter
+	var err error
+
+	if cfg.Telemetry.OTLPEndpoint != "" {
+		ctx := context.Background()
+		exporter, err = otlptracegrpc.New(ctx,
+			otlptracegrpc.WithEndpoint(cfg.Telemetry.OTLPEndpoint),
+			otlptracegrpc.WithInsecure(),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create OTLP gRPC trace exporter: %w", err)
+		}
+	} else {
+		exporter, err = stdouttrace.New(stdouttrace.WithWriter(out))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create stdout trace exporter: %w", err)
+		}
 	}
 
 	res, err := resource.New(context.Background(),
