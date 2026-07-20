@@ -12,6 +12,7 @@ import (
 
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/storage"
+	"go.opentelemetry.io/otel"
 )
 
 // Driver implements storage.StorageDriver for S3-compatible object storage using minio-go.
@@ -55,6 +56,8 @@ func New(cfg config.S3Config) (*Driver, error) {
 
 // Get fetches an object from S3-compatible storage by key.
 func (d *Driver) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+	ctx, span := otel.Tracer("optivor").Start(ctx, "storage.GetObject")
+	defer span.End()
 	// Trim leading slash if present
 	cleanKey := strings.TrimPrefix(key, "/")
 
