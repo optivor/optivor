@@ -66,6 +66,8 @@ func (s *Server) setupRouter() {
 	r.Use(SignedURLMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)
+	r.Get("/health", s.handleHealthz)
+	r.Get("/healtz", s.handleHealthz)
 	r.Get("/metrics", MetricsHandler().ServeHTTP)
 	r.Get("/image/*", s.handleImage)
 
