@@ -5,17 +5,16 @@ milestone lives in [`docs/adr/0000-project-scope.md`](./docs/adr/0000-project-sc
 — this file exists to show the overall trajectory and to prevent
 premature work on later milestones.
 
-## V0 — Prove the core loop (current)
+## V0 — Prove the core loop (Completed)
 
 Goal: a single standalone binary can serve a resized, WebP-converted
 image from an S3-compatible bucket, with no cloud-specific configuration.
 
 Full scope: [`docs/adr/0000-project-scope.md`](./docs/adr/0000-project-scope.md).
 
-Status: 🚧 in progress — architecture decisions locked (ADR-0000 through
-ADR-0004), runtime implementation not yet started.
+Status: ✅ Completed.
 
-## V0.1 — Make it safe to expose (In Progress)
+## V0.1 — Make it safe to expose (Completed)
 
 - [x] Signed URLs and basic policy-based authorization (ADR-0005)
 - [x] AVIF output support (`libheif-dev`)
@@ -24,23 +23,20 @@ ADR-0004), runtime implementation not yet started.
 - [x] LRU cache eviction
 - [x] Cross-compilation matrix (Zig-based toolchain in `.goreleaser.yaml`)
 
-## V0.2 — First deployment adapter
+## V0.2 — First deployment adapter (Completed)
 
-- One real Deployment Adapter (target to be decided — candidates:
-  standalone-as-systemd-service packaging, or Fly.io, chosen for
-  simplicity relative to Cloudflare's proxy-vs-runtime complexity — see
-  ADR-0002)
-- Structured logging and basic metrics (Prometheus)
+- [x] Standalone-as-systemd-service packaging deployment adapter (ADR-0006)
+- [x] Structured logging (JSON/Text slog) and basic metrics (Prometheus endpoint)
 
-## V0.3 — CLI
+## V0.3 — CLI (Completed)
 
-- `optivor init`, `optivor deploy`, config scaffolding
-- CLI orchestrates the Deployment Adapter(s) that exist by this point
+- [x] `optivor init`, `optivor deploy`, config scaffolding
+- [x] CLI orchestrates systemd deployment adapter (ADR-0007)
 
-## V0.4 — Observability
+## V0.4 — Observability (Completed)
 
-- OpenTelemetry tracing
-- `optivor doctor`, `optivor logs`, `optivor metrics` diagnostics commands
+- [x] OpenTelemetry tracing (ADR-0008, stdout + OTLP gRPC)
+- [x] `optivor doctor`, `optivor logs`, `optivor metrics` diagnostics commands
 
 ## V1 — Extension points
 

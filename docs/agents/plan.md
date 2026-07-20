@@ -1168,9 +1168,9 @@ git rebase staging   # merge değil, rebase
 | ADR-0003 | Extensibility Model | ✅ Accepted |
 | ADR-0004 | Technology Choices | ✅ Accepted |
 | ADR-0005 | Signed URL & Auth | ✅ V0.1 (tamamlandı) |
-| ADR-0006 | Deployment Adapter | 📋 V0.2 (Adım K) |
-| ADR-0007 | CLI Design | 📋 V0.3 (Adım N) |
-| ADR-0008 | OpenTelemetry Tracing | 📋 V0.4 (Adım R) |
+| ADR-0006 | Deployment Adapter | ✅ V0.2 (tamamlandı) |
+| ADR-0007 | CLI Design | ✅ V0.3 (tamamlandı) |
+| ADR-0008 | OpenTelemetry Tracing | ✅ V0.4 (tamamlandı) |
 
 ---
 
