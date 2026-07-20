@@ -1492,6 +1492,38 @@ git push origin v0.5.0
 
 ---
 
+## 📋 V0.6 — Multi-Provider & Multi-Bucket Yönetimi
+
+**ROADMAP.md hedefleri:**
+- Multi-provider ile tek noktadan 1'den fazla bucket yönetimi
+- Multi-bucket routing engine (`internal/storage/router`)
+- `optivor.yaml` multi-bucket konfigürasyon şeması
+- Bucket ve provider bazlı failover / fallback politikası
+- Per-bucket metrikler ve `optivor doctor` doğrulamaları
+
+---
+
+### V0.6 Adım Sırası
+
+#### Adım AD — ADR-0011: Multi-Bucket & Multi-Provider Router Design
+- Multi-bucket URL şeması & routing politikaları
+- Bucket alias'ları ve provider sürücü eşlemeleri (`buckets` YAML şeması)
+- Fallback / failover mekanizmaları
+
+#### Adım AE — Multi-Bucket Router Implementation (`internal/storage/router`)
+- S3 / R2 / B2 sürücülerinin tek bir Storage Router altında birleştirilmesi
+- Bucket name & prefix bazlı istek yönlendirmesi
+
+#### Adım AF — Multi-Bucket Dynamic Configuration & CLI Integration
+- `optivor.yaml` şemasına multi-bucket desteği eklenmesi
+- `optivor doctor` ile tüm bucket bağlantılarının test edilmesi
+
+#### Adım AG — V0.6 E2E Kabul Testi & Release
+- Multi-bucket E2E kabul testleri
+- Release promotion -> `v0.6.0`
+
+---
+
 ## 📋 V1 — Extension Points (Taslak)
 
 **ROADMAP.md hedefleri:**
