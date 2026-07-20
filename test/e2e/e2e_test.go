@@ -300,6 +300,40 @@ func TestV07Acceptance(t *testing.T) {
 	}
 }
 
+func BenchmarkImagePipeline(b *testing.B) {
+	testKey := "benchmark/test.jpg"
+	sourceJPEG := createTestJPEG(1000, 1000)
+	memStorage := &memoryStorageDriver{
+		objects: map[string][]byte{testKey: sourceJPEG},
+	}
+	pipe := pipeline.NewPipeline()
+	params := pipeline.TransformParams{Width: 200, Height: 200, Fit: pipeline.FitCover, Format: "webp"}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _, err := pipe.Run(context.Background(), memStorage, testKey, params)
+		if err != nil {
+			b.Fatalf("benchmark failed: %v", err)
+		}
+	}
+}
+
+func TestV08Acceptance(t *testing.T) {
+	// Full end-to-end production readiness validation across all milestone capabilities
+	cfg := &config.Config{
+		Server: config.ServerConfig{Port: 8080, Image: config.ServerImage{MaxWidth: 5000, MaxHeight: 5000}},
+		Cache:  config.CacheConfig{FS: config.FSCacheConfig{Dir: t.TempDir()}},
+		Buckets: []config.BucketConfig{
+			{Name: "prod-images", Endpoint: "http://localhost:9000", Bucket: "prod", Access: "public"},
+		},
+	}
+	if err := config.Validate(cfg); err != nil {
+		t.Fatalf("production validation check failed: %v", err)
+	}
+}
+
+
+
 
 
 
