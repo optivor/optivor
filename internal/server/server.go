@@ -18,6 +18,7 @@ import (
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/storage"
 	"github.com/optivor/optivor/internal/storage/router"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -126,16 +127,28 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	driverToUse := s.driver
+	bucketAlias := "default"
+	bucketProvider := "s3"
+	bucketPolicy := "public"
+
 	if s.bucketRouter != nil {
 		parts := strings.SplitN(key, "/", 2)
 		if len(parts) == 2 {
 			if drv, alias, err := s.bucketRouter.Resolve(r.Context(), parts[0]); err == nil && drv != nil {
 				driverToUse = drv
 				key = parts[1]
-				_ = alias
+				bucketAlias = alias
+				bucketProvider = s.bucketRouter.Provider(alias)
+				bucketPolicy = s.bucketRouter.Policy(alias).String()
 			}
 		}
 	}
+
+	span.SetAttributes(
+		attribute.String("bucket.alias", bucketAlias),
+		attribute.String("bucket.provider", bucketProvider),
+		attribute.String("bucket.policy", bucketPolicy),
+	)
 
 	params, err := s.parseQueryParams(r)
 	if err != nil {
