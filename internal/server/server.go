@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -57,6 +58,7 @@ func (s *Server) setupRouter() {
 	r.Use(SignedURLMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)
+	r.Get("/metrics", MetricsHandler().ServeHTTP)
 	r.Get("/image/*", s.handleImage)
 
 	s.router = r
@@ -92,19 +94,35 @@ func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	var statusCode = http.StatusOK
+	var formatStr = ""
+	var fitStr = "cover"
+
+	defer func() {
+		statusStr := strconv.Itoa(statusCode)
+		requestsTotal.WithLabelValues(statusStr, formatStr, fitStr).Inc()
+		requestDuration.WithLabelValues(statusStr).Observe(time.Since(start).Seconds())
+	}()
+
 	key := chi.URLParam(r, "*")
 	key = strings.TrimPrefix(key, "/")
 
 	if key == "" {
-		http.Error(w, "image key is required", http.StatusBadRequest)
+		statusCode = http.StatusBadRequest
+		http.Error(w, "image key is required", statusCode)
 		return
 	}
 
 	params, err := s.parseQueryParams(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		statusCode = http.StatusBadRequest
+		http.Error(w, err.Error(), statusCode)
 		return
 	}
+
+	formatStr = params.Format
+	fitStr = string(params.Fit)
 
 	// 1. Cache Check
 	if s.cache != nil {
@@ -112,6 +130,7 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 		if cacheErr != nil {
 			s.logger.Warn("Cache get failed", "key", key, "error", cacheErr)
 		} else if hit {
+			cacheHitsTotal.Inc()
 			w.Header().Set("Content-Type", contentType)
 			w.Header().Set("X-Optivor-Cache", "HIT")
 			w.WriteHeader(http.StatusOK)
@@ -119,33 +138,41 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	cacheMissesTotal.Inc()
 
 	// 2. Cache Miss -> Run Pipeline
+	transformStart := time.Now()
 	data, contentType, err := s.pipe.Run(r.Context(), s.driver, key, params)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
-			http.Error(w, "object not found", http.StatusNotFound)
+			statusCode = http.StatusNotFound
+			http.Error(w, "object not found", statusCode)
 			return
 		}
 		if errors.Is(err, pipeline.ErrOversizedImage) {
-			http.Error(w, err.Error(), http.StatusRequestEntityTooLarge)
+			statusCode = http.StatusRequestEntityTooLarge
+			http.Error(w, err.Error(), statusCode)
 			return
 		}
 		if errors.Is(r.Context().Err(), context.DeadlineExceeded) || errors.Is(err, context.DeadlineExceeded) {
-			http.Error(w, "request timeout", http.StatusRequestTimeout)
+			statusCode = http.StatusRequestTimeout
+			http.Error(w, "request timeout", statusCode)
 			return
 		}
 		// Distinguish storage gateway errors vs image processing errors
 		if strings.Contains(err.Error(), "failed to get object from S3") || strings.Contains(err.Error(), "failed to stat object") {
 			s.logger.Error("Storage error", "key", key, "error", err)
-			http.Error(w, "bad gateway storage error", http.StatusBadGateway)
+			statusCode = http.StatusBadGateway
+			http.Error(w, "bad gateway storage error", statusCode)
 			return
 		}
 
 		s.logger.Error("Pipeline processing error", "key", key, "error", err)
-		http.Error(w, "internal processing error", http.StatusInternalServerError)
+		statusCode = http.StatusInternalServerError
+		http.Error(w, "internal processing error", statusCode)
 		return
 	}
+	transformDuration.WithLabelValues(formatStr, fitStr).Observe(time.Since(transformStart).Seconds())
 
 	// 3. Cache Set
 	if s.cache != nil {
