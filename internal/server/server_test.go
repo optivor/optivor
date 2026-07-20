@@ -192,3 +192,21 @@ func TestImageRoute_OversizedImage(t *testing.T) {
 		t.Errorf("expected 413 StatusRequestEntityTooLarge, got %d", rec.Code)
 	}
 }
+
+func TestInitTracer_OTLPEndpoint(t *testing.T) {
+	cfg := &config.Config{
+		Telemetry: config.TelemetryConfig{
+			Enabled:       true,
+			OTLPEndpoint:  "localhost:4317",
+			ServiceName:   "optivor-test",
+			SamplingRatio: 1.0,
+		},
+	}
+	tp, err := server.InitTracer(cfg, nil)
+	if err != nil {
+		t.Fatalf("failed to init tracer with OTLPEndpoint: %v", err)
+	}
+	if tp == nil {
+		t.Error("expected non-nil TracerProvider")
+	}
+}
