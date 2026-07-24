@@ -17,6 +17,27 @@ type Config struct {
 	Image     ImageConfig     `mapstructure:"image"`
 	Auth      AuthConfig      `mapstructure:"auth"`
 	Telemetry TelemetryConfig `mapstructure:"telemetry"`
+	Remote    RemoteConfig    `mapstructure:"remote"`
+	Presets   map[string]PresetConfig `mapstructure:"presets"`
+	Crawler   CrawlerConfig   `mapstructure:"crawler"`
+}
+
+type RemoteConfig struct {
+	Enabled        bool     `mapstructure:"enabled"`
+	AllowedDomains []string `mapstructure:"allowed_domains"`
+}
+
+type PresetConfig struct {
+	Width  int    `mapstructure:"w"`
+	Height int    `mapstructure:"h"`
+	Format string `mapstructure:"f"`
+	Fit    string `mapstructure:"fit"`
+	Quality int   `mapstructure:"q"`
+}
+
+type CrawlerConfig struct {
+	Enabled               bool `mapstructure:"enabled"`
+	MaxConcurrencyPerVariant int  `mapstructure:"max_concurrency_per_variant"`
 }
 
 type BucketConfig struct {
@@ -124,6 +145,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("telemetry.enabled", false)
 	v.SetDefault("telemetry.service_name", "optivor")
 	v.SetDefault("telemetry.sampling_ratio", 1.0)
+	v.SetDefault("remote.enabled", true)
+	v.SetDefault("remote.allowed_domains", []string{"*"})
+	v.SetDefault("crawler.enabled", true)
+	v.SetDefault("crawler.max_concurrency_per_variant", 10)
 }
 
 // Load reads configuration using Viper and validates required fields.

@@ -64,11 +64,15 @@ func (s *Server) setupRouter() {
 	}
 	r.Use(RateLimitMiddleware(s.cfg))
 	r.Use(SignedURLMiddleware(s.cfg))
+	r.Use(CrawlerProtectionMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)
 	r.Get("/health", s.handleHealthz)
 	r.Get("/healtz", s.handleHealthz)
 	r.Get("/metrics", MetricsHandler().ServeHTTP)
+	r.Get("/fetch", s.handleFetch)
+	r.Get("/remote", s.handleFetch)
+	r.Get("/preset/{presetName}/*", s.handlePreset)
 	r.Get("/image/*", s.handleImage)
 
 	s.router = r
@@ -275,4 +279,50 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 	}
 
 	return params, nil
+}
+
+func (s *Server) handlePreset(w http.ResponseWriter, r *http.Request) {
+	presetName := chi.URLParam(r, "presetName")
+	if presetName == "" {
+		http.Error(w, "preset name is required", http.StatusBadRequest)
+		return
+	}
+
+	preset, exists := s.cfg.Presets[presetName]
+	if !exists {
+		http.Error(w, fmt.Sprintf("preset '%s' not found", presetName), http.StatusNotFound)
+		return
+	}
+
+	params, err := s.parseQueryParams(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	params = pipeline.ApplyPreset(preset, params)
+
+	key := chi.URLParam(r, "*")
+	key = strings.TrimPrefix(key, "/")
+
+	if key == "" {
+		http.Error(w, "image key is required", http.StatusBadRequest)
+		return
+	}
+
+	// Reuse image handling with preset-modified params
+	driverToUse := s.driver
+	data, contentType, err := s.pipe.Run(r.Context(), driverToUse, key, params)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			http.Error(w, "object not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "preset processing error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
 }
