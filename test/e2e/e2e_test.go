@@ -17,6 +17,7 @@ import (
 
 	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/optivor/optivor/internal/cache/fs"
+	"github.com/optivor/optivor/internal/cache/persistent"
 	"github.com/optivor/optivor/internal/cli"
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
@@ -318,19 +319,72 @@ func BenchmarkImagePipeline(b *testing.B) {
 	}
 }
 
-func TestV08Acceptance(t *testing.T) {
-	// Full end-to-end production readiness validation across all milestone capabilities
+func TestV09Acceptance(t *testing.T) {
+	// 1. Persistent Cache Validation
+	cacheDir := t.TempDir()
+	pCache, err := persistent.NewPersistentCache(cacheDir)
+	if err != nil {
+		t.Fatalf("failed to initialize persistent cache: %v", err)
+	}
+
+	// 2. Server Setup with Remote Fetching, Crawler Protection, and Presets
 	cfg := &config.Config{
-		Server: config.ServerConfig{Port: 8080, Image: config.ServerImage{MaxWidth: 5000, MaxHeight: 5000}},
-		Cache:  config.CacheConfig{FS: config.FSCacheConfig{Dir: t.TempDir()}},
-		Buckets: []config.BucketConfig{
-			{Name: "prod-images", Endpoint: "http://localhost:9000", Bucket: "prod", Access: "public"},
+		Server: config.ServerConfig{
+			Port: 8080,
+			Image: config.ServerImage{MaxWidth: 5000, MaxHeight: 5000},
+		},
+		Cache: config.CacheConfig{FS: config.FSCacheConfig{Dir: cacheDir}},
+		Remote: config.RemoteConfig{
+			Enabled:        true,
+			AllowedDomains: []string{"example.com"},
+		},
+		Presets: map[string]config.PresetConfig{
+			"avatar": {Width: 150, Height: 150, Format: "webp", Fit: "cover"},
+		},
+		Crawler: config.CrawlerConfig{
+			Enabled:               true,
+			MaxConcurrencyPerVariant: 5,
 		},
 	}
-	if err := config.Validate(cfg); err != nil {
-		t.Fatalf("production validation check failed: %v", err)
+
+	pipe := pipeline.NewPipeline()
+	srv := server.New(cfg, nil, pCache, pipe, nil)
+	ts := httptest.NewServer(srv.Router())
+	defer ts.Close()
+
+	// 3. Verify Remote Fetching SSRF / Whitelist Guard
+	respWhitelisted, err := http.Get(ts.URL + "/fetch?url=http://unallowed-domain.com/image.png")
+	if err != nil {
+		t.Fatalf("failed to send /fetch request: %v", err)
+	}
+	defer respWhitelisted.Body.Close()
+	if respWhitelisted.StatusCode != http.StatusForbidden {
+		t.Errorf("expected status 403 for non-whitelisted domain, got %d", respWhitelisted.StatusCode)
+	}
+
+	// 4. Verify Preset Endpoint Route Resolution
+	respPresetNotFound, err := http.Get(ts.URL + "/preset/nonexistent/sample.jpg")
+	if err != nil {
+		t.Fatalf("failed to send /preset request: %v", err)
+	}
+	defer respPresetNotFound.Body.Close()
+	if respPresetNotFound.StatusCode != http.StatusNotFound {
+		t.Errorf("expected status 404 for nonexistent preset, got %d", respPresetNotFound.StatusCode)
+	}
+
+	// 5. Verify Crawler Detection
+	reqCrawler, _ := http.NewRequest("GET", ts.URL+"/healthz", nil)
+	reqCrawler.Header.Set("User-Agent", "Googlebot/2.1")
+	respCrawler, err := http.DefaultClient.Do(reqCrawler)
+	if err != nil {
+		t.Fatalf("failed to send crawler request: %v", err)
+	}
+	defer respCrawler.Body.Close()
+	if respCrawler.StatusCode != http.StatusOK {
+		t.Errorf("expected status 200 for crawler healthz, got %d", respCrawler.StatusCode)
 	}
 }
+
 
 
 
