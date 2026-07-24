@@ -310,19 +310,48 @@ func (s *Server) handlePreset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Reuse image handling with preset-modified params
+	// Resolve bucket router if configured
 	driverToUse := s.driver
+	if s.bucketRouter != nil {
+		parts := strings.SplitN(key, "/", 2)
+		if len(parts) == 2 {
+			if drv, _, err := s.bucketRouter.Resolve(r.Context(), parts[0]); err == nil && drv != nil {
+				driverToUse = drv
+				key = parts[1]
+			}
+		}
+	}
+
+	// 1. Cache Check
+	cacheKey := fmt.Sprintf("preset:%s:%s", presetName, key)
+	if s.cache != nil {
+		cachedData, contentType, hit, cacheErr := s.cache.Get(r.Context(), cacheKey, params)
+		if cacheErr == nil && hit {
+			w.Header().Set("Content-Type", contentType)
+			w.Header().Set("X-Optivor-Cache", "HIT")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(cachedData)
+			return
+		}
+	}
+
 	data, contentType, err := s.pipe.Run(r.Context(), driverToUse, key, params)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			http.Error(w, "object not found", http.StatusNotFound)
 			return
 		}
+		s.logger.Error("Preset processing error", "preset", presetName, "key", key, "error", err)
 		http.Error(w, "preset processing error", http.StatusInternalServerError)
 		return
 	}
 
+	if s.cache != nil {
+		_ = s.cache.Set(r.Context(), cacheKey, params, data, contentType)
+	}
+
 	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("X-Optivor-Cache", "MISS")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }
