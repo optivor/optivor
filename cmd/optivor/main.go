@@ -13,6 +13,8 @@ import (
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/server"
+	"github.com/optivor/optivor/internal/storage"
+	"github.com/optivor/optivor/internal/storage/router"
 	"github.com/optivor/optivor/internal/storage/s3"
 )
 
@@ -53,10 +55,56 @@ func runServer(configPath string, providerFlag string) {
 		os.Exit(1)
 	}
 
-	storageDriver, err := s3.New(cfg.Storage.S3)
-	if err != nil {
-		logger.Error("Failed to initialize S3 storage driver", "error", err)
-		os.Exit(1)
+	var storageDriver storage.StorageDriver
+	var bucketRouter router.BucketRouter
+
+	if len(cfg.Buckets) > 0 {
+		targets := make(map[string]router.BucketTarget)
+		var defaultAlias string
+		for i, b := range cfg.Buckets {
+			if i == 0 {
+				defaultAlias = b.Name
+			}
+			s3Cfg := config.S3Config{
+				Endpoint:        b.Endpoint,
+				Bucket:          b.Bucket,
+				Region:          b.Region,
+				AccessKeyID:     b.AccessKeyID,
+				SecretAccessKey: b.SecretAccessKey,
+			}
+			var driver storage.StorageDriver
+			if s3Cfg.Endpoint != "" {
+				d, err := s3.New(s3Cfg)
+				if err != nil {
+					logger.Error("Failed to initialize bucket storage driver", "bucket", b.Name, "error", err)
+					os.Exit(1)
+				}
+				driver = d
+			}
+			if i == 0 {
+				storageDriver = driver
+			}
+			targets[b.Name] = router.BucketTarget{
+				Alias:    b.Name,
+				Driver:   driver,
+				Policy:   router.ParseAccessPolicy(b.Access),
+				Fallback: b.Fallback,
+				Provider: b.Provider,
+			}
+		}
+		r, err := router.NewDefaultRouter(targets, defaultAlias)
+		if err != nil {
+			logger.Error("Failed to initialize bucket router", "error", err)
+			os.Exit(1)
+		}
+		bucketRouter = r
+	} else if cfg.Storage.S3.Endpoint != "" {
+		sd, err := s3.New(cfg.Storage.S3)
+		if err != nil {
+			logger.Error("Failed to initialize S3 storage driver", "error", err)
+			os.Exit(1)
+		}
+		storageDriver = sd
 	}
 
 	cacheStore, err := fs.New(cfg.Cache.FS.Dir, cfg.Cache.FS.MaxSizeMB*1024*1024)
@@ -69,6 +117,9 @@ func runServer(configPath string, providerFlag string) {
 	defer pipeline.ShutdownVips()
 
 	srv := server.New(cfg, storageDriver, cacheStore, pipe, logger)
+	if bucketRouter != nil {
+		srv.SetBucketRouter(bucketRouter)
+	}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
