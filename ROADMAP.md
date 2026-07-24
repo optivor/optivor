@@ -69,15 +69,15 @@ Goal: Manage multiple storage buckets across diverse providers (AWS S3, Cloudfla
 - [x] External driver protocol SDK specification (`docs/wiki/driver-sdk-specification.md`)
 - [x] CI benchmark regression gating job (`go test -bench`)
 
-## V0.9 — Production Resilience & Developer Ecosystem (Planned)
+## V0.9 — Production Resilience & Developer Ecosystem (Completed)
 
 Goal: Address real-world Next.js & Crawler cost spikes, deployment cache invalidation issues, and provide zero-config frontend ecosystem integrations.
 
-- [ ] Deploy-Proof Persistent Caching (Redis/Storage-backed cache layer preserved across application redeployments)
-- [ ] Transparent Remote Fetching (`/remote` & `/fetch` endpoints with strict domain whitelist for on-the-fly optimization)
-- [ ] Bot & Crawler Protection / Smart Throttling (Rate-limiting and variant concurrency guards against automated web crawlers hitting 10-15 `srcset` URLs)
-- [ ] Dynamic Preset Engine (Named URL alias presets e.g., `/preset/avatar/photo.jpg` -> `w=150,h=150,f=avif,q=80`)
-- [ ] Official Optivor Next.js Image Loader (`@optivor/next` npm package for zero-config `next/image` integration)
+- [x] Deploy-Proof Persistent Caching (Redis/Storage-backed cache layer preserved across application redeployments)
+- [x] Transparent Remote Fetching (`/remote` & `/fetch` endpoints with strict domain whitelist for on-the-fly optimization)
+- [x] Bot & Crawler Protection / Smart Throttling (Rate-limiting and variant concurrency guards against automated web crawlers hitting 10-15 `srcset` URLs)
+- [x] Dynamic Preset Engine (Named URL alias presets e.g., `/preset/avatar/photo.jpg` -> `w=150,h=150,f=avif,q=80`)
+- [x] Official Optivor Next.js Image Loader (`@optivor/next` npm package for zero-config `next/image` integration)
 
 
 ## V1 — Extension points

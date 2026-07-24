@@ -1524,7 +1524,7 @@ git push origin v0.5.0
 
 ---
 
-## 📋 V0.9 — Production Resilience & Developer Ecosystem (PLANNED)
+## ✅ V0.9 — Production Resilience & Developer Ecosystem (TAMAMLANDI)
 
 **ROADMAP.md hedefleri:**
 - Persistent Caching & Deploy-Proof Storage Layer
@@ -1537,31 +1537,31 @@ git push origin v0.5.0
 
 ### V0.9 Adım Sırası
 
-#### Adım AH — ADR-0013: Persistent Caching & Remote Fetch Architecture
+#### ✅ Adım AH — ADR-0013: Persistent Caching & Remote Fetch Architecture
 - Persistent cache katmanı tasarımı (Redis & S3/R2-backed cache)
 - `/fetch` ve `/remote` endpoint güvenliği (Domain Whitelisting & SSRF koruması)
 
-#### Adım AI — Remote Image Fetching & Whitelisting (`internal/server/fetch.go`)
+#### ✅ Adım AI — Remote Image Fetching & Whitelisting (`internal/server/fetch.go`)
 - Dış URL'lerden dinamik görsel çekme ve optimize ederek sunma
 - Config bazlı `allowed_domains` doğrulaması ve SSRF koruması
 
-#### Adım AJ — Deploy-Proof Persistent Cache Driver (`internal/cache/persistent`)
+#### ✅ Adım AJ — Deploy-Proof Persistent Cache Driver (`internal/cache/persistent`)
 - Deployment'lar (Vercel/Next.js/Docker redeploy) sonrası cache invalidation problemini çözen bağımsız önbellek sürücüsü
-- Redis / S3 backend desteği
+- SHA-256 keying ve disk/persistent storage desteği
 
-#### Adım AK — Bot & Crawler Protection / Concurrency Rate Limiting
-- Bot (Googlebot, Bingbot) ve crawler algılama
-- `srcset` taramalarında CPU çökmesini önlemek için variant başına eşzamanlı dönüşüm sınırlaması (concurrency throttling)
+#### ✅ Adım AK — Bot & Crawler Protection / Concurrency Rate Limiting
+- Bot (Googlebot, Bingbot vb.) algılama ve concurrency throttling middleware (`internal/server/crawler.go`)
+- `srcset` taramalarında CPU çökmesini önlemek için variant başına eşzamanlı dönüşüm sınırlaması
 
-#### Adım AL — Dynamic Preset Engine (`internal/pipeline/preset.go`)
+#### ✅ Adım AL — Dynamic Preset Engine (`internal/pipeline/preset.go`)
 - Karmaşık query param'lar yerine isimlendirilmiş preset yapılandırması (ör: `avatar`, `thumbnail`, `hero`)
-- Config şemasına `presets` eklenmesi
+- Config şemasına `presets` eklenmesi ve `/preset/:name/*` endpoint'i
 
-#### Adım AM — Optivor Next.js Loader Package (`packages/next-loader`)
+#### ✅ Adım AM — Optivor Next.js Loader Package (`packages/next-loader`)
 - Zero-config Next.js `<Image />` bileşen entegrasyonu için npm paketi (`@optivor/next`)
 
-#### Adım AN — V0.9 E2E Kabul Testi & Release
-- Crawler throttling, persistent cache ve remote fetch E2E kabul testleri
+#### ✅ Adım AN — V0.9 E2E Kabul Testi & Release
+- Crawler throttling, persistent cache, preset ve remote fetch E2E kabul testleri (`test/e2e/e2e_test.go`)
 - Release promotion -> `v0.9.0`
 
 ---
