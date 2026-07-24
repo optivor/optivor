@@ -64,6 +64,7 @@ func (s *Server) setupRouter() {
 	}
 	r.Use(RateLimitMiddleware(s.cfg))
 	r.Use(SignedURLMiddleware(s.cfg))
+	r.Use(CrawlerProtectionMiddleware(s.cfg))
 
 	r.Get("/healthz", s.handleHealthz)
 	r.Get("/health", s.handleHealthz)
