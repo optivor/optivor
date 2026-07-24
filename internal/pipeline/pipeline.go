@@ -74,6 +74,14 @@ func (p *Pipeline) Run(ctx context.Context, driver storage.StorageDriver, key st
 		return nil, "", fmt.Errorf("failed to read source image stream: %w", err)
 	}
 
+	return p.TransformBytes(ctx, data, params)
+}
+
+// TransformBytes transforms raw image bytes directly.
+func (p *Pipeline) TransformBytes(ctx context.Context, data []byte, params TransformParams) ([]byte, string, error) {
+	ctx, span := otel.Tracer("optivor").Start(ctx, "pipeline.TransformBytes")
+	defer span.End()
+
 	// If no transformation or format change is requested, passthrough original image bytes
 	if params.Width <= 0 && params.Height <= 0 && params.Format == "" {
 		return data, detectContentType(data), nil
