@@ -237,6 +237,31 @@ not as part of finishing a regular feature task. Once merged, a version
 tag is pushed on `main` to trigger the release pipeline — see
 `docs/ci-cd.md` §"Continuous Deployment".
 
+### 4.3 Versioning Strategy & Tagging Policy (Semantic Versioning 2.0.0)
+
+Optivor strictly follows Semantic Versioning 2.0.0 (`MAJOR.MINOR.PATCH` or `MAJOR.MINOR.PATCH.HOTFIX`):
+
+- **MAJOR (`vX.0.0`):** Incompatible architectural breaking changes or core API redesigns.
+- **MINOR (`v0.X.0`):** New feature milestones as defined in `ROADMAP.md` (e.g. `v0.9.0`, `v0.10.0`).
+- **PATCH (`v0.9.X` or `v0.9.X.Y`):** Backward-compatible bug fixes, security patch remediations (e.g. CodeQL or Dependabot vulnerability resolution), and hotfixes (e.g. `v0.9.2` or `v0.9.1.1`).
+
+#### Release & Tagging Execution:
+
+```bash
+# 1. Create annotated version tag on main
+git tag -a v0.9.2 -m "Release v0.9.2: Security patch for gRPC & SSRF CodeQL vulnerability"
+
+# 2. Force-update the floating 'latest' release pointer tag
+git tag -fa latest -m "Tag latest release v0.9.2"
+
+# 3. Push both tags to remote
+git push origin v0.9.2
+git push --force origin latest
+
+# 4. Publish GitHub Release marked with --latest
+gh release create v0.9.2 --title "v0.9.2 — Security Patch & Hotfix" --generate-notes --latest
+```
+
 ## 5. Order of operations when writing code
 
 When implementing a feature that spans layers, **write and commit in
