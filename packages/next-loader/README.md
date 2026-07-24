@@ -1,6 +1,6 @@
 # `@optivor/next`
 
-Zero-config Next.js `next/image` custom loader integration for Optivor.
+Zero-config Next.js `next/image` component and loader integration for Optivor.
 
 ## Installation
 
@@ -10,18 +10,7 @@ npm install @optivor/next
 pnpm add @optivor/next
 ```
 
-## Usage
-
-In your `next.config.js`:
-
-```js
-module.exports = {
-  images: {
-    loader: 'custom',
-    loaderFile: './node_modules/@optivor/next/index.js',
-  },
-};
-```
+## Zero-Config Component Usage (Recommended)
 
 Set environment variable:
 
@@ -29,4 +18,39 @@ Set environment variable:
 NEXT_PUBLIC_OPTIVOR_URL=https://optivor.example.com
 ```
 
-Now all standard `<Image />` tags will automatically route through your Optivor instance for high-performance WebP/AVIF transformation and caching!
+Use `<Image />` directly in your Next.js App Router or Pages Router app with zero `next.config.js` edits:
+
+```tsx
+import { Image } from '@optivor/next';
+
+export default function Hero() {
+  return (
+    <Image
+      src="/hero.png"
+      width={1200}
+      height={800}
+      alt="Hero Image"
+    />
+  );
+}
+```
+
+## Custom Loader Usage
+
+If you prefer using standard `<Image />` tags with Next.js loader configuration:
+
+```js
+// optivor-loader.js
+const { optivorLoader } = require('@optivor/next');
+module.exports = optivorLoader;
+```
+
+```js
+// next.config.js
+module.exports = {
+  images: {
+    loader: 'custom',
+    loaderFile: './optivor-loader.js',
+  },
+};
+```
