@@ -41,6 +41,46 @@ var safeTransport = &http.Transport{
 	},
 }
 
+// validateAndBuildRemoteURL validates scheme, domain whitelist, and private IPs, returning a clean URL string.
+func validateAndBuildRemoteURL(rawURL string, allowedDomains []string) (string, error) {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return "", errors.New("invalid URL syntax")
+	}
+
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", errors.New("unsupported URL scheme")
+	}
+
+	hostname := parsed.Hostname()
+	if hostname == "" {
+		return "", errors.New("missing host in URL")
+	}
+
+	if !isDomainAllowed(hostname, allowedDomains) {
+		return "", fmt.Errorf("domain '%s' is not whitelisted", hostname)
+	}
+
+	ips, err := net.LookupIP(hostname)
+	if err != nil || len(ips) == 0 {
+		return "", errors.New("failed to resolve host IP")
+	}
+	for _, ip := range ips {
+		if isPrivateIP(ip) {
+			return "", errors.New("access to private IP address is prohibited")
+		}
+	}
+
+	port := parsed.Port()
+	hostPort := hostname
+	if port != "" {
+		hostPort = net.JoinHostPort(hostname, port)
+	}
+
+	cleanURL := fmt.Sprintf("%s://%s%s", parsed.Scheme, hostPort, parsed.RequestURI())
+	return cleanURL, nil
+}
+
 func (s *Server) handleFetch(w http.ResponseWriter, r *http.Request) {
 	if s.cfg.Remote.Enabled == false {
 		http.Error(w, "remote image fetching is disabled", http.StatusForbidden)
@@ -53,36 +93,11 @@ func (s *Server) handleFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	targetURL, err := url.Parse(targetURLStr)
-	if err != nil || (targetURL.Scheme != "http" && targetURL.Scheme != "https") {
-		http.Error(w, "invalid or unsupported 'url' parameter scheme", http.StatusBadRequest)
+	validatedURL, err := validateAndBuildRemoteURL(targetURLStr, s.cfg.Remote.AllowedDomains)
+	if err != nil {
+		s.logger.Warn("Remote fetch rejected", "url", targetURLStr, "reason", err)
+		http.Error(w, err.Error(), http.StatusForbidden)
 		return
-	}
-
-	hostname := targetURL.Hostname()
-	if hostname == "" {
-		http.Error(w, "invalid host in 'url'", http.StatusBadRequest)
-		return
-	}
-
-	if !isDomainAllowed(hostname, s.cfg.Remote.AllowedDomains) {
-		s.logger.Warn("Remote fetch domain rejected", "domain", hostname)
-		http.Error(w, fmt.Sprintf("domain '%s' is not whitelisted", hostname), http.StatusForbidden)
-		return
-	}
-
-	// SSRF Protection: IP Resolution & Validation
-	ips, err := net.LookupIP(hostname)
-	if err != nil || len(ips) == 0 {
-		http.Error(w, "failed to resolve host IP", http.StatusBadRequest)
-		return
-	}
-	for _, ip := range ips {
-		if isPrivateIP(ip) {
-			s.logger.Warn("SSRF attempt blocked", "domain", hostname, "ip", ip.String())
-			http.Error(w, "access to internal/private IP address is prohibited", http.StatusForbidden)
-			return
-		}
 	}
 
 	params, err := s.parseQueryParams(r)
@@ -104,20 +119,12 @@ func (s *Server) handleFetch(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Reconstruct sanitized URL object to ensure static analysis compliance
-	safeURL := &url.URL{
-		Scheme:   targetURL.Scheme,
-		Host:     targetURL.Host,
-		Path:     targetURL.Path,
-		RawQuery: targetURL.RawQuery,
-	}
-
 	client := &http.Client{
 		Timeout:   10 * time.Second,
 		Transport: safeTransport,
 	}
 
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, safeURL.String(), nil)
+	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, validatedURL, nil)
 	if err != nil {
 		http.Error(w, "failed to create remote request", http.StatusInternalServerError)
 		return
@@ -126,7 +133,7 @@ func (s *Server) handleFetch(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		s.logger.Error("Remote fetch failed", "url", safeURL.String(), "error", err)
+		s.logger.Error("Remote fetch failed", "url", validatedURL, "error", err)
 		http.Error(w, "failed to fetch remote image", http.StatusBadGateway)
 		return
 	}
