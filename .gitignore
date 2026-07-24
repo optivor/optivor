@@ -11,6 +11,7 @@
 /optivor
 
 # Local config overrides / cache
+optivor.yaml
 optivor.local.yaml
 /tmp/optivor-cache/
 
