@@ -69,6 +69,8 @@ func (s *Server) setupRouter() {
 	r.Get("/health", s.handleHealthz)
 	r.Get("/healtz", s.handleHealthz)
 	r.Get("/metrics", MetricsHandler().ServeHTTP)
+	r.Get("/fetch", s.handleFetch)
+	r.Get("/remote", s.handleFetch)
 	r.Get("/image/*", s.handleImage)
 
 	s.router = r
