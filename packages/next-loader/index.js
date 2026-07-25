@@ -1,5 +1,3 @@
-const React = require('react');
-
 /**
  * Optivor custom loader function for Next.js image optimization
  */
@@ -20,11 +18,12 @@ function optivorLoader({ src, width, quality }) {
  * Optivor React Image component wrapping next/image for zero-config integration
  */
 function Image(props) {
-  let NextImage;
+  let React, NextImage;
   try {
+    React = require('react');
     NextImage = require('next/image').default;
   } catch (e) {
-    throw new Error('@optivor/next: next/image must be installed in your project to use the Image component.');
+    throw new Error('@optivor/next: react and next/image must be installed in your project to use the Image component.');
   }
 
   return React.createElement(NextImage, Object.assign({}, props, { loader: optivorLoader }));
