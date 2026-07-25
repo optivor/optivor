@@ -45,4 +45,10 @@ func TestLocalDriver_Get(t *testing.T) {
 	if err != storage.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
+
+	// Test path traversal attempt returns ErrNotFound
+	_, err = d.Get(context.Background(), "../../etc/passwd")
+	if err != storage.ErrNotFound {
+		t.Errorf("expected ErrNotFound for path traversal attempt, got %v", err)
+	}
 }
