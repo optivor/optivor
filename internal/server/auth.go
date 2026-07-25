@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/optivor/optivor/internal/config"
@@ -70,4 +71,68 @@ func SignedURLMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+// ValidateAPIKey checks if the request header contains a valid API key with required scope and bucket access.
+func ValidateAPIKey(r *http.Request, cfg *config.Config, bucket string, requiredScope string) bool {
+	if cfg == nil || len(cfg.Auth.APIKeys) == 0 {
+		return true
+	}
+
+	key := r.Header.Get("X-API-Key")
+	if key == "" {
+		authHeader := r.Header.Get("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			key = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+	}
+
+	if key == "" {
+		return false
+	}
+
+	for _, k := range cfg.Auth.APIKeys {
+		if k.Key == key {
+			bucketAllowed := false
+			if len(k.Buckets) == 0 {
+				bucketAllowed = true
+			} else {
+				for _, b := range k.Buckets {
+					if b == "*" || b == bucket {
+						bucketAllowed = true
+						break
+					}
+				}
+			}
+			if !bucketAllowed {
+				return false
+			}
+
+			if requiredScope == "" || len(k.Scopes) == 0 {
+				return true
+			}
+			for _, s := range k.Scopes {
+				if s == "*" || s == requiredScope {
+					return true
+				}
+			}
+			return false
+		}
+	}
+
+	return false
+}
+
+// GenerateDelegatedSignedURL generates a dynamic signed URL delegation token for private bucket access.
+func GenerateDelegatedSignedURL(baseURL string, bucket string, key string, scope string, expiresAt time.Time, secret string) string {
+	q := url.Values{}
+	q.Set("bucket", bucket)
+	q.Set("key", key)
+	q.Set("scope", scope)
+	q.Set("expires", strconv.FormatInt(expiresAt.Unix(), 10))
+
+	sig := GenerateSignature("/auth/delegate", q, secret)
+	q.Set("sig", sig)
+
+	return baseURL + "/auth/delegate?" + q.Encode()
 }
