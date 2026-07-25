@@ -102,6 +102,26 @@ Status: ✅ Completed.
   - [x] Add custom Prometheus `/metrics` endpoint (exposing request latencies, libvips cache utilization, and Redis pool stats).
   - [x] Add `checksum/config` annotation to the Helm Deployment pod template for automatic rolling config updates.
 
+## V1.1 — Developer Experience & Zero-Friction Onboarding (In Progress)
+
+Goal: Eliminate developer setup friction, enable zero-config local trials, and provide 1-line installation tools.
+
+- [ ] **Zero-Config Local Storage Fallback Mode**: Allow `optivor start` to serve local disk images (`./storage`) out-of-the-box when no YAML or S3 credentials are provided.
+- [ ] **100% Environment Variable Configuration**: Support zero-file configuration (`OPTIVOR_S3_BUCKET`, `OPTIVOR_S3_REGION`, etc.) for seamless PaaS/Serverless container execution.
+- [ ] **1-Line Shell Installer**: `curl -fsSL https://optivor.io/install.sh | bash` script auto-detecting OS/architecture and adding the Optivor binary to system `PATH`.
+- [ ] **Interactive CLI Wizard (`optivor init --interactive`)**: Step-by-step CLI prompt to configure S3/R2 credentials, test connection live, and generate `optivor.yaml`.
+- [ ] **1-Click PaaS Deployment Templates**: Deploy buttons and templates for Railway, Render, and Fly.io in the primary documentation and README.
+
+## V1.2 — Advanced Engine Capabilities & Ecosystem SDKs (Planned)
+
+Goal: Expand dynamic media transformation features and extend frontend/backend framework integrations.
+
+- [ ] **Dynamic Watermarking & Overlays**: Image overlays with custom position (`gravity`), opacity, and scaling controls (`overlay=logo.png&gravity=bottom_right&opacity=50`).
+- [ ] **Manual Focal Point Cropping**: Direct coordinate-based focal cropping (`focal=0.3,0.7`) to complement smart entropy cropping.
+- [ ] **Animated Media Conversion**: GIF to animated WebP/MP4 micro-conversions for bandwidth optimization.
+- [ ] **Image Filter Effects**: Dynamic blur (`blur=10`), grayscale (`grayscale=true`), and pixelation (`pixelate=5`).
+- [ ] **Ecosystem Client SDKs**: Official packages for `@optivor/react`, `@optivor/vue` (Nuxt), `@optivor/js`, `optivor-php` (Laravel), and `optivor-python` (Django/FastAPI).
+
 ## Explicitly not scheduled
 
 These are known ideas that are **not** on this roadmap yet. They are not
