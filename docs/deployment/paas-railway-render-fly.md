@@ -1,15 +1,27 @@
 # PaaS Deployment Blueprint: Railway, Render & Fly.io
 
-This guide provides 1-click container deployment configurations and instructions for deploying Optivor on modern PaaS platforms using 100% environment variable configuration.
+This guide provides step-by-step instructions for deploying Optivor on modern PaaS platforms (Railway, Render, Fly.io) using either **Direct GitHub Repository Builds (Zero GHCR setup)** or **GitHub Container Registry (GHCR) images**.
+
+---
+
+## Deployment Strategies
+
+### Option A: Direct GitHub Repository Build (Recommended - Zero Registry Required)
+Both Railway, Render, and Fly.io can build directly from your GitHub repository using the `Dockerfile` included in the root directory. **You do not need to build or push container images to GHCR beforehand.**
+
+### Option B: GHCR Container Image Deployment
+If you prefer deploying pre-built container images, GitHub Actions automatically builds and publishes `ghcr.io/optivor/optivor:latest` whenever a release tag is pushed.
 
 ---
 
 ## 1. Railway Deployment
 
-Optivor can be deployed directly to Railway using standard environment variables without mounting a configuration file.
-
-### Environment Variables
-Set the following environment variables in your Railway project service settings:
+### Method A: Deploy Direct from GitHub Repo (No GHCR required)
+1. Log into [Railway.app](https://railway.app).
+2. Click **New Project** -> **Deploy from GitHub repo**.
+3. Select your `optivor` repository.
+4. Railway automatically detects the root `Dockerfile` and builds the project.
+5. In **Variables**, add your environment variables:
 
 ```env
 PORT=8080
@@ -26,15 +38,21 @@ OPTIVOR_CACHE_REDIS_ADDR=redis.railway.internal:6379
 
 ## 2. Render Deployment
 
-Deploy Optivor on Render using a Web Service running the official `ghcr.io/optivor/optivor:latest` container image.
+### Method A: Deploy Direct from GitHub Repo (No GHCR required)
+1. Log into [Render.com](https://render.com).
+2. Click **New +** -> **Web Service**.
+3. Connect your GitHub repository (`optivor`).
+4. Set Environment to **Docker** (leave Build Command and Start Command blank as Render reads `Dockerfile`).
+5. Add required environment variables under **Environment Variables**.
 
-### `render.yaml` Blueprint
+### Method B: `render.yaml` Infrastructure-as-Code
 
 ```yaml
 services:
   - type: web
     name: optivor-engine
     env: docker
+    # Option B: Image URL (or comment out imageUrl if deploying from repo)
     imageUrl: ghcr.io/optivor/optivor:latest
     plan: starter
     region: oregon
@@ -57,7 +75,14 @@ services:
 
 ## 3. Fly.io Deployment
 
-Deploy Optivor as a ultra-fast edge container on Fly.io across global regions.
+### Method A: Deploy Direct from Local Source / GitHub (No GHCR required)
+Run Fly CLI in your repository root:
+
+```bash
+fly launch
+```
+
+Fly automatically detects `Dockerfile`, builds it remotely, and deploys the container.
 
 ### `fly.toml` Configuration
 
@@ -66,7 +91,8 @@ app = "optivor-engine"
 primary_region = "iad"
 
 [build]
-  image = "ghcr.io/optivor/optivor:latest"
+  # Leave dockerfile specified if building from repo, or set image for GHCR
+  dockerfile = "Dockerfile"
 
 [env]
   PORT = "8080"
