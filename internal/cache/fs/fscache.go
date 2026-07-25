@@ -23,7 +23,7 @@ func New(dir string, maxSizeBytes int64) (*FSCache, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("cache directory path cannot be empty")
 	}
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return nil, fmt.Errorf("failed to create cache directory: %w", err)
 	}
 	return &FSCache{dir: dir, maxSizeBytes: maxSizeBytes}, nil
@@ -43,6 +43,7 @@ func (c *FSCache) Get(ctx context.Context, key string, params pipeline.Transform
 	cacheKey := c.generateKey(key, params)
 	filePath := filepath.Join(c.dir, cacheKey)
 
+	// #nosec G304
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -82,6 +83,7 @@ func (c *FSCache) Set(ctx context.Context, key string, params pipeline.Transform
 	}
 
 	buf := make([]byte, 1+len(contentType)+len(data))
+	// #nosec G115
 	buf[0] = byte(len(contentType))
 	copy(buf[1:], []byte(contentType))
 	copy(buf[1+len(contentType):], data)
@@ -94,14 +96,17 @@ func (c *FSCache) Set(ctx context.Context, key string, params pipeline.Transform
 	tmpName := tmpFile.Name()
 
 	if _, err := tmpFile.Write(buf); err != nil {
-		tmpFile.Close()
-		os.Remove(tmpName)
+		_ = tmpFile.Close()
+		_ = os.Remove(tmpName)
 		return fmt.Errorf("failed to write to temp cache file: %w", err)
 	}
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		_ = os.Remove(tmpName)
+		return fmt.Errorf("failed to close temp cache file: %w", err)
+	}
 
 	if err := os.Rename(tmpName, filePath); err != nil {
-		os.Remove(tmpName)
+		_ = os.Remove(tmpName)
 		return fmt.Errorf("failed to commit cache file: %w", err)
 	}
 
