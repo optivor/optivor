@@ -199,6 +199,23 @@ func Load(configFilePath string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	// Map shorthand PaaS cloud env vars if not explicitly set via storage.s3.*
+	if s3Bucket := v.GetString("S3_BUCKET"); s3Bucket != "" && v.GetString("STORAGE.S3.BUCKET") == "" {
+		v.Set("storage.s3.bucket", s3Bucket)
+	}
+	if s3Endpoint := v.GetString("S3_ENDPOINT"); s3Endpoint != "" && v.GetString("STORAGE.S3.ENDPOINT") == "" {
+		v.Set("storage.s3.endpoint", s3Endpoint)
+	}
+	if s3Region := v.GetString("S3_REGION"); s3Region != "" && v.GetString("STORAGE.S3.REGION") == "" {
+		v.Set("storage.s3.region", s3Region)
+	}
+	if s3Key := v.GetString("S3_ACCESS_KEY_ID"); s3Key != "" && v.GetString("STORAGE.S3.ACCESS_KEY_ID") == "" {
+		v.Set("storage.s3.access_key_id", s3Key)
+	}
+	if s3Secret := v.GetString("S3_SECRET_ACCESS_KEY"); s3Secret != "" && v.GetString("STORAGE.S3.SECRET_ACCESS_KEY") == "" {
+		v.Set("storage.s3.secret_access_key", s3Secret)
+	}
+
 	if err := v.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if !errors.As(err, &configFileNotFoundError) && configFilePath != "" {
@@ -241,13 +258,16 @@ func Validate(cfg *Config) error {
 				return fmt.Errorf("buckets[%d].bucket is required", i)
 			}
 		}
-	} else {
+	} else if cfg.Storage.Driver == "s3" || cfg.Storage.S3.Endpoint != "" || cfg.Storage.S3.Bucket != "" {
 		if cfg.Storage.S3.Endpoint == "" {
 			return errors.New("storage.s3.endpoint is required")
 		}
 		if cfg.Storage.S3.Bucket == "" {
 			return errors.New("storage.s3.bucket is required")
 		}
+	} else {
+		// Zero-config local storage fallback mode
+		cfg.Storage.Driver = "local"
 	}
 	if cfg.Cache.Type == "" {
 		cfg.Cache.Type = "fs"

@@ -116,3 +116,28 @@ func TestValidate_MissingRequiredFields(t *testing.T) {
 		t.Errorf("expected validation error for missing endpoint, got nil")
 	}
 }
+
+func TestValidate_ZeroConfigFallback(t *testing.T) {
+	cfg := &config.Config{
+		Server: config.ServerConfig{
+			Port: 8080,
+			Image: config.ServerImage{
+				MaxWidth:  5000,
+				MaxHeight: 5000,
+			},
+		},
+		Cache: config.CacheConfig{
+			FS: config.FSCacheConfig{
+				Dir: "/tmp/cache",
+			},
+		},
+	}
+
+	if err := config.Validate(cfg); err != nil {
+		t.Fatalf("expected zero-config fallback to validate without error, got %v", err)
+	}
+
+	if cfg.Storage.Driver != "local" {
+		t.Errorf("expected Storage.Driver to be 'local', got %q", cfg.Storage.Driver)
+	}
+}
