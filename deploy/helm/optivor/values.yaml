@@ -93,8 +93,8 @@ config:
   storage:
     driver: s3
     s3:
-      endpoint: ""
-      bucket: ""
+      endpoint: "http://optivor-minio:9000"
+      bucket: "optivor-images"
       region: us-east-1
       # Leave empty if using secretRef
       access_key_id: ""
