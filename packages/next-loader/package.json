@@ -1,6 +1,6 @@
 {
   "name": "@optivor/next",
-  "version": "0.9.0",
+  "version": "1.0.0-alpha.6",
   "description": "Zero-config Optivor custom image loader for Next.js next/image component",
   "main": "index.js",
   "keywords": [
