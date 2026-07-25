@@ -43,6 +43,9 @@ It is not an image hosting service and does not lock your data into a proprietar
 > [!NOTE]
 > **Persistent Caching & Bot Protection:** V0.9+ introduces deploy-proof persistent cache stores, transparent remote fetching (`/fetch`, `/remote`), and crawler concurrency rate limiting.
 >
+> [!NOTE]
+> **Stateless Scaling & Smart K8s Deployments:** V1.0+ introduces attention/entropy-based Smart Cropping (`fit=smart`), a stateless Redis cache backend for multi-pod scaling, and official Kubernetes Helm Chart deployment adapters.
+>
 > [!IMPORTANT]
 > **DoS Protection Notice:** Enforce reasonable `max_width` and `max_height` values in `optivor.yaml` to prevent decompression-bomb attacks.
 
@@ -50,14 +53,22 @@ It is not an image hosting service and does not lock your data into a proprietar
 
 ## 5-Minute Quick Start
 
-### 1. Run Instantly with Docker (Recommended)
+### 1. Run Instantly with Docker or Helm (Recommended)
 
-Try Optivor instantly without compiling code or installing system dependencies (`libvips`):
+Try Optivor instantly with Docker:
 
 ```bash
 # Try Optivor instantly with Docker (No Go or libvips required)
 docker run -p 8080:8080 -v $(pwd)/optivor.yaml:/etc/optivor/optivor.yaml optivor/optivor:latest
 ```
+
+Or deploy to a Kubernetes cluster using the official Helm chart:
+
+```bash
+helm install optivor ./deploy/helm/optivor
+```
+
+For advanced settings, see the [Kubernetes & Helm Deployment Guide](./docs/deployment/kubernetes.md).
 
 #### Advanced: Build from Source (Go Binary)
 
@@ -256,6 +267,7 @@ Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 
 - [Introduction](./docs/wiki/introduction.md) — Framework overview and philosophy
 - [Quick Start Guide](./docs/wiki/quick-start.md) — Setup with Docker and binary
+- [Kubernetes & Helm Deployment Guide](./docs/deployment/kubernetes.md) — Production HA Kubernetes setup and Helm reference
 - [CLI Reference](./docs/wiki/cli-reference.md) — Command and flag reference
 - [Configuration Reference](./docs/wiki/configuration.md) — `optivor.yaml` schema & environment overrides
 - [Multi-Cloud & Multi-Bucket Management](./docs/wiki/multi-cloud-management.md) — Multi-bucket configuration & security policies
