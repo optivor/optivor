@@ -16,6 +16,7 @@ import (
 	"github.com/optivor/optivor/internal/pipeline"
 	"github.com/optivor/optivor/internal/server"
 	"github.com/optivor/optivor/internal/storage"
+	"github.com/optivor/optivor/internal/storage/local"
 	"github.com/optivor/optivor/internal/storage/router"
 	"github.com/optivor/optivor/internal/storage/s3"
 )
@@ -32,7 +33,7 @@ func main() {
 	}
 
 	configPath := flag.String("config", "", "path to config file (default: ./optivor.yaml)")
-	provider := flag.String("provider", "", "override storage provider (e.g. s3, minio, r2)")
+	provider := flag.String("provider", "", "override storage provider (e.g. s3, minio, r2, local)")
 	flag.Parse()
 
 	runServer(*configPath, *provider)
@@ -52,7 +53,7 @@ func runServer(configPath string, providerFlag string) {
 	logger := server.NewLogger(cfg, os.Stdout)
 
 	drv := cfg.Storage.Driver
-	if drv != "" && drv != "s3" && drv != "minio" && drv != "r2" {
+	if drv != "" && drv != "s3" && drv != "minio" && drv != "r2" && drv != "local" {
 		logger.Error("Unknown storage provider", "provider", drv)
 		os.Exit(1)
 	}
@@ -107,6 +108,14 @@ func runServer(configPath string, providerFlag string) {
 			os.Exit(1)
 		}
 		storageDriver = sd
+	} else {
+		ld, err := local.New("./storage")
+		if err != nil {
+			logger.Error("Failed to initialize local storage driver", "error", err)
+			os.Exit(1)
+		}
+		storageDriver = ld
+		logger.Info("Using zero-config local storage fallback", "directory", "./storage")
 	}
 
 	var cacheStore cache.Cache
