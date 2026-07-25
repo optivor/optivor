@@ -27,13 +27,27 @@ func New(baseDir string) (*Driver, error) {
 	return &Driver{baseDir: baseDir}, nil
 }
 
-// Get opens and returns a local file given an object key.
+// Get opens and returns a local file given an object key safely without path traversal.
 func (d *Driver) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+	absBaseDir, err := filepath.Abs(d.baseDir)
+	if err != nil {
+		return nil, fmt.Errorf("invalid base dir: %w", err)
+	}
+
 	cleanKey := filepath.Clean(key)
 	cleanKey = strings.TrimPrefix(cleanKey, "/")
-	fullPath := filepath.Join(d.baseDir, cleanKey)
 
-	f, err := os.Open(fullPath)
+	if strings.Contains(cleanKey, "..") {
+		return nil, storage.ErrNotFound
+	}
+
+	fullPath := filepath.Join(absBaseDir, cleanKey)
+	absPath, err := filepath.Abs(fullPath)
+	if err != nil || !strings.HasPrefix(absPath, absBaseDir) {
+		return nil, storage.ErrNotFound
+	}
+
+	f, err := os.Open(absPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, storage.ErrNotFound
