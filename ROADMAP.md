@@ -80,29 +80,27 @@ Goal: Address real-world Next.js & Crawler cost spikes, deployment cache invalid
 - [x] Official Optivor Next.js Image Loader (`@optivor/next` npm package for zero-config `next/image` integration)
 
 
-## V1 — Production Readiness & Extension Points (In Progress)
+## V1 — Production Readiness & Extension Points (Completed)
 
 Goal: Professional-grade horizontal scaling, B2B deployment primitives, smart media optimization, and stable extensibility APIs.
+
+Status: ✅ Completed.
 
 - [x] **Smart Cropping (`fit=smart`)**: Entropy/attention-based cropping utilizing libvips `InterestingAttention`.
 - [x] **Redis Cache Backend**: Stateless and horizontally scalable caching layer across multiple pods/nodes.
 - [x] **Helm Chart & Kubernetes manifests**: Production-ready helm installation and configuration values for B2B/Cloud deployments.
-- [ ] Storage Driver interface finalized and documented for external
-  contributors (additional drivers beyond S3-compatible)
-- [ ] Runtime Module mechanism decided (see `docs/adr/0003-extensibility-model.md`)
-  and documented
-- [ ] Additional Deployment Adapters (Cloudflare, AWS) — each
-  documenting explicitly whether it deploys the full runtime or a proxy
-  in front of it, per ADR-0002
-- [ ] **Enterprise IAM & Dynamic Access Control**:
-  - [ ] Support AWS IRSA (IAM Roles for Service Accounts) and GKE Workload Identity natively (token credential providers instead of static keys).
-  - [ ] Implement client-level API-Key token authorization policies with bucket-level operation scopes (read/write/lifecycle).
-  - [ ] Implement Dynamic Signed URL delegation with HMAC secret validation for private bucket isolation.
-- [ ] **Production Infrastructure Hardening**:
-  - [ ] Add `NetworkPolicy` to the Helm Chart to restrict outbound pod traffic to whitelisted endpoints.
-  - [ ] Implement Redis connection pool sizing controls and a circuit-breaker for graceful S3 fallback when Redis goes offline.
-  - [ ] Add custom Prometheus `/metrics` endpoint (exposing request latencies, libvips cache utilization, and Redis pool stats).
-  - [ ] Add `checksum/config` annotation to the Helm Deployment pod template for automatic rolling config updates.
+- [x] Storage Driver interface finalized and documented for external contributors (additional drivers beyond S3-compatible)
+- [x] Runtime Module mechanism decided (ADR-0015) and documented
+- [x] Additional Deployment Adapters (Cloudflare Worker Edge Proxy, AWS ECS Fargate Container) — each documenting explicitly whether it deploys the full runtime or a proxy in front of it, per ADR-0002
+- [x] **Enterprise IAM & Dynamic Access Control**:
+  - [x] Support AWS IRSA (IAM Roles for Service Accounts) and GKE Workload Identity natively (token credential providers instead of static keys).
+  - [x] Implement client-level API-Key token authorization policies with bucket-level operation scopes (read/write/lifecycle).
+  - [x] Implement Dynamic Signed URL delegation with HMAC secret validation for private bucket isolation.
+- [x] **Production Infrastructure Hardening**:
+  - [x] Add `NetworkPolicy` to the Helm Chart to restrict outbound pod traffic to whitelisted endpoints.
+  - [x] Implement Redis connection pool sizing controls and a circuit-breaker for graceful S3 fallback when Redis goes offline.
+  - [x] Add custom Prometheus `/metrics` endpoint (exposing request latencies, libvips cache utilization, and Redis pool stats).
+  - [x] Add `checksum/config` annotation to the Helm Deployment pod template for automatic rolling config updates.
 
 ## Explicitly not scheduled
 

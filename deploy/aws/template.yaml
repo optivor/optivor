@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Optivor AWS ECS Fargate Deployment Adapter (Full Runtime)
+
+Parameters:
+  ContainerImage:
+    Type: String
+    Default: optivor/optivor:latest
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+
+Resources:
+  OptivorCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: optivor-cluster
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  OptivorTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: optivor-runtime
+      Cpu: '1024'
+      Memory: '2048'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: optivor
+          Image: !Ref ContainerImage
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          Environment:
+            - Name: OPTIVOR_CACHE_TYPE
+              Value: redis
+
+Outputs:
+  ClusterName:
+    Value: !Ref OptivorCluster

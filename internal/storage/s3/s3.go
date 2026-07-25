@@ -37,8 +37,16 @@ func New(cfg config.S3Config) (*Driver, error) {
 		endpoint = u.Host
 	}
 
+	var creds *credentials.Credentials
+	if cfg.AccessKeyID != "" && cfg.SecretAccessKey != "" {
+		creds = credentials.NewStaticV4(cfg.AccessKeyID, cfg.SecretAccessKey, "")
+	} else {
+		// Use IAM / AWS IRSA / GKE Workload Identity credential provider when static keys are omitted
+		creds = credentials.NewIAM("")
+	}
+
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		Creds:  creds,
 		Secure: secure,
 		Region: cfg.Region,
 	}
@@ -78,4 +86,56 @@ func (d *Driver) Get(ctx context.Context, key string) (io.ReadCloser, error) {
 	}
 
 	return obj, nil
+}
+
+// Put uploads an object to S3 storage.
+func (d *Driver) Put(ctx context.Context, key string, reader io.Reader, size int64, contentType string) error {
+	ctx, span := otel.Tracer("optivor").Start(ctx, "storage.PutObject")
+	defer span.End()
+
+	cleanKey := strings.TrimPrefix(key, "/")
+	_, err := d.client.PutObject(ctx, d.bucket, cleanKey, reader, size, minio.PutObjectOptions{
+		ContentType: contentType,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to put object in S3: %w", err)
+	}
+	return nil
+}
+
+// Delete removes an object from S3 storage.
+func (d *Driver) Delete(ctx context.Context, key string) error {
+	ctx, span := otel.Tracer("optivor").Start(ctx, "storage.DeleteObject")
+	defer span.End()
+
+	cleanKey := strings.TrimPrefix(key, "/")
+	err := d.client.RemoveObject(ctx, d.bucket, cleanKey, minio.RemoveObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete object from S3: %w", err)
+	}
+	return nil
+}
+
+// Stat retrieves object metadata from S3 storage.
+func (d *Driver) Stat(ctx context.Context, key string) (storage.ObjectInfo, error) {
+	ctx, span := otel.Tracer("optivor").Start(ctx, "storage.StatObject")
+	defer span.End()
+
+	cleanKey := strings.TrimPrefix(key, "/")
+	info, err := d.client.StatObject(ctx, d.bucket, cleanKey, minio.StatObjectOptions{})
+	if err != nil {
+		errResp := minio.ToErrorResponse(err)
+		if errResp.Code == "NoSuchKey" || errResp.Code == "NotFound" || errResp.StatusCode == 404 {
+			return storage.ObjectInfo{}, storage.ErrNotFound
+		}
+		return storage.ObjectInfo{}, fmt.Errorf("failed to stat object in S3: %w", err)
+	}
+
+	return storage.ObjectInfo{
+		Key:          info.Key,
+		Size:         info.Size,
+		ETag:         info.ETag,
+		LastModified: info.LastModified,
+		ContentType:  info.ContentType,
+	}, nil
 }

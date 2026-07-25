@@ -102,11 +102,15 @@ type CacheConfig struct {
 }
 
 type RedisCacheConfig struct {
-	Addr     string        `mapstructure:"addr"`
-	Password string        `mapstructure:"password"`
-	DB       int           `mapstructure:"db"`
-	Prefix   string        `mapstructure:"prefix"`
-	TTL      time.Duration `mapstructure:"ttl"`
+	Addr                       string        `mapstructure:"addr"`
+	Password                   string        `mapstructure:"password"`
+	DB                         int           `mapstructure:"db"`
+	Prefix                     string        `mapstructure:"prefix"`
+	TTL                        time.Duration `mapstructure:"ttl"`
+	PoolSize                   int           `mapstructure:"pool_size"`
+	MinIdleConns               int           `mapstructure:"min_idle_conns"`
+	CircuitBreakerMaxFailures int           `mapstructure:"circuit_breaker_max_failures"`
+	CircuitBreakerTimeout     time.Duration `mapstructure:"circuit_breaker_timeout"`
 }
 
 type FSCacheConfig struct {
@@ -122,6 +126,14 @@ type ImageConfig struct {
 
 type AuthConfig struct {
 	SignedURLs SignedURLsConfig `mapstructure:"signed_urls"`
+	APIKeys    []APIKeyConfig   `mapstructure:"api_keys"`
+}
+
+type APIKeyConfig struct {
+	Key     string   `mapstructure:"key"`
+	Name    string   `mapstructure:"name"`
+	Buckets []string `mapstructure:"buckets"`
+	Scopes  []string `mapstructure:"scopes"`
 }
 
 type SignedURLsConfig struct {
@@ -146,6 +158,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("cache.redis.addr", "localhost:6379")
 	v.SetDefault("cache.redis.prefix", "optivor:cache:")
 	v.SetDefault("cache.redis.ttl", 24*time.Hour)
+	v.SetDefault("cache.redis.pool_size", 10)
+	v.SetDefault("cache.redis.min_idle_conns", 5)
+	v.SetDefault("cache.redis.circuit_breaker_max_failures", 5)
+	v.SetDefault("cache.redis.circuit_breaker_timeout", 30*time.Second)
 	v.SetDefault("image.contain_background_color", "#ffffff")
 	v.SetDefault("image.max_pixels", 25000000)
 	v.SetDefault("image.max_decode_mb", 64)
