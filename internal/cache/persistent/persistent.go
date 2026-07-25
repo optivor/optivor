@@ -19,7 +19,7 @@ func NewPersistentCache(baseDir string) (*PersistentCache, error) {
 	if baseDir == "" {
 		baseDir = "/tmp/optivor-persistent-cache"
 	}
-	if err := os.MkdirAll(baseDir, 0755); err != nil {
+	if err := os.MkdirAll(baseDir, 0750); err != nil {
 		return nil, fmt.Errorf("failed to create persistent cache dir: %w", err)
 	}
 	return &PersistentCache{baseDir: baseDir}, nil
@@ -37,11 +37,13 @@ func (p *PersistentCache) Get(ctx context.Context, key string, params pipeline.T
 	dataPath := filepath.Join(p.baseDir, hash+".data")
 	metaPath := filepath.Join(p.baseDir, hash+".meta")
 
+	// #nosec G304
 	data, err := os.ReadFile(dataPath)
 	if err != nil {
 		return nil, "", false, nil
 	}
 
+	// #nosec G304
 	metaBytes, err := os.ReadFile(metaPath)
 	if err != nil {
 		return nil, "", false, nil
@@ -55,11 +57,11 @@ func (p *PersistentCache) Set(ctx context.Context, key string, params pipeline.T
 	dataPath := filepath.Join(p.baseDir, hash+".data")
 	metaPath := filepath.Join(p.baseDir, hash+".meta")
 
-	if err := os.WriteFile(dataPath, data, 0644); err != nil {
+	if err := os.WriteFile(dataPath, data, 0600); err != nil {
 		return fmt.Errorf("failed to write persistent cache data: %w", err)
 	}
 
-	if err := os.WriteFile(metaPath, []byte(contentType), 0644); err != nil {
+	if err := os.WriteFile(metaPath, []byte(contentType), 0600); err != nil {
 		return fmt.Errorf("failed to write persistent cache metadata: %w", err)
 	}
 

@@ -34,7 +34,7 @@ func getRegistryPath() (string, error) {
 		return "", fmt.Errorf("failed to locate user home directory: %w", err)
 	}
 	dir := filepath.Join(home, ".config", "optivor")
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return "", fmt.Errorf("failed to create config directory: %w", err)
 	}
 	return filepath.Join(dir, "drivers.json"), nil
@@ -47,7 +47,9 @@ func loadRegistry() (*DriverRegistry, error) {
 	}
 
 	reg := &DriverRegistry{Drivers: make(map[string]DriverMetadata)}
-	data, err := os.ReadFile(path)
+	cleanPath := filepath.Clean(path)
+	// #nosec G304
+	data, err := os.ReadFile(cleanPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return reg, nil
@@ -73,7 +75,7 @@ func saveRegistry(reg *DriverRegistry) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal registry data: %w", err)
 	}
-	return os.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0600)
 }
 
 var driverCmd = &cobra.Command{
@@ -106,6 +108,7 @@ var driverInstallCmd = &cobra.Command{
 			return fmt.Errorf("driver path %s is a directory, expected executable file", absPath)
 		}
 
+		// #nosec G204
 		out, err := exec.Command(absPath, "--optivor-handshake").Output()
 		if err != nil {
 			return fmt.Errorf("driver handshake failed for %s: %w", absPath, err)

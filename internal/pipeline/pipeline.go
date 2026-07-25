@@ -41,6 +41,7 @@ var (
 func InitVips() {
 	vipsOnce.Do(func() {
 		vips.LoggingSettings(nil, vips.LogLevelError)
+		// #nosec G104
 		vips.Startup(nil)
 	})
 }

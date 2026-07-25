@@ -59,7 +59,7 @@ func RunInit(force bool) error {
 		return fmt.Errorf("optivor.yaml already exists. Use --force to overwrite")
 	}
 
-	if err := os.WriteFile(targetFile, []byte(defaultConfigTemplate), 0644); err != nil {
+	if err := os.WriteFile(targetFile, []byte(defaultConfigTemplate), 0600); err != nil {
 		return fmt.Errorf("failed to write %s: %w", targetFile, err)
 	}
 

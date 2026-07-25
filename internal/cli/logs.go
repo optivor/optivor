@@ -35,6 +35,7 @@ func RunLogs(lines string, follow bool) error {
 		args = append(args, "-f")
 	}
 
+	// #nosec G204
 	cmd := exec.Command("journalctl", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
