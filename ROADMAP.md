@@ -102,21 +102,23 @@ Status: ✅ Completed.
   - [x] Add custom Prometheus `/metrics` endpoint (exposing request latencies, libvips cache utilization, and Redis pool stats).
   - [x] Add `checksum/config` annotation to the Helm Deployment pod template for automatic rolling config updates.
 
-## V1.1 — Developer Experience & Zero-Friction Onboarding (In Progress)
+## V1.1 — Developer Experience & Zero-Friction Onboarding (Completed)
 
 Goal: Eliminate developer setup friction, enable zero-config local trials, and provide 1-line installation tools.
 
-- [ ] **Zero-Config Local Storage Fallback Mode**: Allow `optivor start` to serve local disk images (`./storage`) out-of-the-box when no YAML or S3 credentials are provided.
-- [ ] **100% Environment Variable Configuration**: Support zero-file configuration (`OPTIVOR_S3_BUCKET`, `OPTIVOR_S3_REGION`, etc.) for seamless PaaS/Serverless container execution.
-- [ ] **1-Line Shell Installer**: `curl -fsSL https://optivor.app/install.sh | bash` script auto-detecting OS/architecture and adding the Optivor binary to system `PATH`.
-- [ ] **Interactive CLI Wizard (`optivor init --interactive`)**: Step-by-step CLI prompt to configure S3/R2 credentials, test connection live, and generate `optivor.yaml`.
-- [ ] **1-Click PaaS Deployment Templates**: Deploy buttons and templates for Railway, Render, and Fly.io in the primary documentation and README.
-- [ ] **ADR & Architecture Specifications**:
-  - [ ] `docs/adr/0016-zero-config-fallback-and-env-override-matrix.md` — ADR specifying zero-config local fallback mechanics and environment variable override precedence.
-- [ ] **Deployment Guides & Wiki Documentation**:
-  - [ ] `docs/deployment/paas-railway-render-fly.md` — 1-Click deployment guides and container blueprints for Railway, Render, and Fly.io.
-  - [ ] `docs/wiki/zero-config-quickstart.md` — Guide for running Optivor locally in under 10 seconds without cloud credentials.
-  - [ ] `docs/wiki/cli-wizard-guide.md` — Detailed CLI reference and walkthrough for `optivor init --interactive`.
+Status: ✅ Completed.
+
+- [x] **Zero-Config Local Storage Fallback Mode**: Allow `optivor start` to serve local disk images (`./storage`) out-of-the-box when no YAML or S3 credentials are provided.
+- [x] **100% Environment Variable Configuration**: Support zero-file configuration (`OPTIVOR_S3_BUCKET`, `OPTIVOR_S3_REGION`, etc.) for seamless PaaS/Serverless container execution.
+- [x] **1-Line Shell Installer**: `curl -fsSL https://optivor.app/install.sh | bash` script auto-detecting OS/architecture and adding the Optivor binary to system `PATH`.
+- [x] **Interactive CLI Wizard (`optivor init --interactive`)**: Step-by-step CLI prompt to configure S3/R2 credentials, test connection live, and generate `optivor.yaml`.
+- [x] **1-Click PaaS Deployment Templates**: Deploy buttons and templates for Railway, Render, and Fly.io in the primary documentation and README.
+- [x] **ADR & Architecture Specifications**:
+  - [x] `docs/adr/0016-zero-config-fallback-and-env-override-matrix.md` — ADR specifying zero-config local fallback mechanics and environment variable override precedence.
+- [x] **Deployment Guides & Wiki Documentation**:
+  - [x] `docs/deployment/paas-railway-render-fly.md` — 1-Click deployment guides and container blueprints for Railway, Render, and Fly.io.
+  - [x] `docs/wiki/zero-config-quickstart.md` — Guide for running Optivor locally in under 10 seconds without cloud credentials.
+  - [x] `docs/wiki/cli-wizard-guide.md` — Detailed CLI reference and walkthrough for `optivor init --interactive`.
 
 ## V1.2 — Advanced Engine Capabilities & Ecosystem SDKs (Planned)
 
@@ -132,6 +134,17 @@ Goal: Expand dynamic media transformation features and extend frontend/backend f
 - [ ] **Transformation Guides & SDK Specifications**:
   - [ ] `docs/wiki/watermarking-and-effects.md` — Comprehensive parameter reference for watermarks, overlays, and image filters.
   - [ ] `docs/wiki/client-sdk-specification.md` — Standardized framework SDK contract for official client libraries.
+
+## Future Planned — Granular IAM & Path-Level Access Control (Target Version TBD)
+
+Goal: Provide fine-grained role-based access control (RBAC) and IAM path policies for multi-bucket / single URL routing, enabling user-level path isolation (e.g., user-A restricted to `s3://bucket/folder-a/*`).
+
+- [ ] **Path-Based Prefix Authorization Policies**: Restrict API key tokens and signed URLs to specific object key prefixes/folders within S3/R2 buckets.
+- [ ] **Role-Based Privilege Definition (IAM Rules)**: Support declarative role definitions (`admin`, `editor`, `reader-path-only`) mapping identities to bucket/prefix capabilities.
+- [ ] **ADR & Architecture Specifications**:
+  - [ ] `docs/adr/0019-iam-path-privilege-and-role-policy.md` — Specification for IAM role evaluation and path-level prefix validation.
+- [ ] **Wiki Documentation**:
+  - [ ] `docs/wiki/iam-path-authorization-guide.md` — Guide for defining folder-level privileges and role policies in Optivor.
 
 ## Future Planned — Open-Core Cloud Control Plane Integration (Target Version TBD)
 
