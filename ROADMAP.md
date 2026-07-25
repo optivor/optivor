@@ -133,6 +133,18 @@ Goal: Expand dynamic media transformation features and extend frontend/backend f
   - [ ] `docs/wiki/watermarking-and-effects.md` — Comprehensive parameter reference for watermarks, overlays, and image filters.
   - [ ] `docs/wiki/client-sdk-specification.md` — Standardized framework SDK contract for official client libraries.
 
+## Future Planned — Open-Core Cloud Control Plane Integration (Target Version TBD)
+
+Goal: Allow self-hosted Optivor Engine instances to optionally pair with the free `optivor.app` SaaS Cloud Dashboard for real-time analytics, bandwidth savings tracking, and visual monitoring.
+
+- [ ] **Opt-in Cloud Pairing Engine (`optivor connect`)**: Add optional non-blocking background telemetry sync daemon connecting self-hosted instances via `OPTIVOR_CLOUD_KEY` / Access Key pairing.
+- [ ] **Privacy-First Aggregate Telemetry Protocol**: Transmit non-sensitive aggregate operational metrics (request count, cache HIT/MISS ratio, bandwidth saved, latency distribution) — zero image binaries or private payloads transmitted.
+- [ ] **Fail-Safe Telemetry Fallback**: Guarantee 100% uninterrupted local image processing when cloud control plane network connection is unavailable or unconfigured.
+- [ ] **ADR & Architecture Specifications**:
+  - [ ] `docs/adr/0018-cloud-control-plane-pairing-and-telemetry-protocol.md` — ADR specifying non-blocking phone-home telemetry protocol, fail-safe isolation, and privacy guarantees.
+- [ ] **Wiki Documentation**:
+  - [ ] `docs/wiki/cloud-dashboard-pairing.md` — Walkthrough for pairing self-hosted Optivor instances with the free `optivor.app` dashboard.
+
 ## Explicitly not scheduled
 
 These are known ideas that are **not** on this roadmap yet. They are not
