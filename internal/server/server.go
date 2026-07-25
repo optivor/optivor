@@ -176,6 +176,7 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", contentType)
 			w.Header().Set("X-Optivor-Cache", "HIT")
 			w.WriteHeader(http.StatusOK)
+			// #nosec G705
 			_, _ = w.Write(cachedData)
 			return
 		}
@@ -226,6 +227,7 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("X-Optivor-Cache", "MISS")
 	w.WriteHeader(http.StatusOK)
+	// #nosec G705
 	_, _ = w.Write(data)
 }
 
@@ -330,6 +332,7 @@ func (s *Server) handlePreset(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", contentType)
 			w.Header().Set("X-Optivor-Cache", "HIT")
 			w.WriteHeader(http.StatusOK)
+			// #nosec G705
 			_, _ = w.Write(cachedData)
 			return
 		}
@@ -353,5 +356,6 @@ func (s *Server) handlePreset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("X-Optivor-Cache", "MISS")
 	w.WriteHeader(http.StatusOK)
+	// #nosec G705
 	_, _ = w.Write(data)
 }

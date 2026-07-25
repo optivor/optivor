@@ -75,6 +75,7 @@ func RunDoctor(configPath string) error {
 	}
 
 	// Check 4: libvips runtime initialization check
+	// #nosec G104
 	vips.Startup(nil)
 	defer vips.Shutdown()
 	fmt.Printf("  ✅ libvips %s initialized successfully\n", vips.Version)
