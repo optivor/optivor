@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "optivor.fullname" . }}
+  labels:
+    {{- include "optivor.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "optivor.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "optivor.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "optivor.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-config"
+            - "/etc/optivor/optivor.yaml"
+          env:
+            # Inject S3 Access Key ID
+            - name: OPTIVOR_STORAGE_S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret | default (include "optivor.fullname" .) }}
+                  key: OPTIVOR_STORAGE_S3_ACCESS_KEY_ID
+                  optional: true
+            # Inject S3 Secret Access Key
+            - name: OPTIVOR_STORAGE_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret | default (include "optivor.fullname" .) }}
+                  key: OPTIVOR_STORAGE_S3_SECRET_ACCESS_KEY
+                  optional: true
+            # Inject Redis Password
+            - name: OPTIVOR_CACHE_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret | default (include "optivor.fullname" .) }}
+                  key: OPTIVOR_CACHE_REDIS_PASSWORD
+                  optional: true
+            # Inject Auth Secret
+            - name: OPTIVOR_AUTH_SIGNED_URLS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret | default (include "optivor.fullname" .) }}
+                  key: OPTIVOR_AUTH_SIGNED_URLS_SECRET
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/optivor
+              readOnly: true
+            # Mount a writable tmp directory (required for readOnlyRootFilesystem)
+            - name: tmp-volume
+              mountPath: /tmp
+            {{- if and (eq .Values.config.cache.type "fs") .Values.config.cache.fs.persistence.enabled }}
+            - name: cache-volume
+              mountPath: {{ .Values.config.cache.fs.dir }}
+            {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "optivor.fullname" . }}-config
+        - name: tmp-volume
+          emptyDir: {}
+        {{- if and (eq .Values.config.cache.type "fs") .Values.config.cache.fs.persistence.enabled }}
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: {{ include "optivor.fullname" . }}-cache
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -48,6 +48,12 @@ func applyResize(img *vips.ImageRef, params TransformParams) error {
 			return fmt.Errorf("failed cover thumbnail: %w", err)
 		}
 
+	case FitSmart:
+		// Smart crop resize using attention-based cropping
+		if err := img.Thumbnail(targetW, targetH, vips.InterestingAttention); err != nil {
+			return fmt.Errorf("failed smart thumbnail: %w", err)
+		}
+
 	case FitFill:
 		// Scale directly to target dimensions ignoring aspect ratio
 		hScale := float64(targetW) / float64(origW)
