@@ -96,7 +96,17 @@ type S3Config struct {
 }
 
 type CacheConfig struct {
-	FS FSCacheConfig `mapstructure:"fs"`
+	Type  string           `mapstructure:"type"`
+	FS    FSCacheConfig    `mapstructure:"fs"`
+	Redis RedisCacheConfig `mapstructure:"redis"`
+}
+
+type RedisCacheConfig struct {
+	Addr     string        `mapstructure:"addr"`
+	Password string        `mapstructure:"password"`
+	DB       int           `mapstructure:"db"`
+	Prefix   string        `mapstructure:"prefix"`
+	TTL      time.Duration `mapstructure:"ttl"`
 }
 
 type FSCacheConfig struct {
@@ -130,8 +140,12 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.log_format", "text")
 	v.SetDefault("server.image.max_width", 5000)
 	v.SetDefault("server.image.max_height", 5000)
+	v.SetDefault("cache.type", "fs")
 	v.SetDefault("cache.fs.dir", "/tmp/optivor-cache")
 	v.SetDefault("cache.fs.max_size_mb", 1024)
+	v.SetDefault("cache.redis.addr", "localhost:6379")
+	v.SetDefault("cache.redis.prefix", "optivor:cache:")
+	v.SetDefault("cache.redis.ttl", 24*time.Hour)
 	v.SetDefault("image.contain_background_color", "#ffffff")
 	v.SetDefault("image.max_pixels", 25000000)
 	v.SetDefault("image.max_decode_mb", 64)
@@ -219,8 +233,17 @@ func Validate(cfg *Config) error {
 			return errors.New("storage.s3.bucket is required")
 		}
 	}
-	if cfg.Cache.FS.Dir == "" {
-		return errors.New("cache.fs.dir is required")
+	if cfg.Cache.Type == "" {
+		cfg.Cache.Type = "fs"
+	}
+	if cfg.Cache.Type != "fs" && cfg.Cache.Type != "redis" {
+		return fmt.Errorf("cache.type must be either 'fs' or 'redis', got: %s", cfg.Cache.Type)
+	}
+	if cfg.Cache.Type == "fs" && cfg.Cache.FS.Dir == "" {
+		return errors.New("cache.fs.dir is required when cache.type is 'fs'")
+	}
+	if cfg.Cache.Type == "redis" && cfg.Cache.Redis.Addr == "" {
+		return errors.New("cache.redis.addr is required when cache.type is 'redis'")
 	}
 	if cfg.Image.ContainBackgroundColor == "" {
 		cfg.Image.ContainBackgroundColor = "#ffffff"

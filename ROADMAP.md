@@ -80,13 +80,18 @@ Goal: Address real-world Next.js & Crawler cost spikes, deployment cache invalid
 - [x] Official Optivor Next.js Image Loader (`@optivor/next` npm package for zero-config `next/image` integration)
 
 
-## V1 — Extension points
+## V1 — Production Readiness & Extension Points (In Progress)
 
-- Storage Driver interface finalized and documented for external
+Goal: Professional-grade horizontal scaling, B2B deployment primitives, smart media optimization, and stable extensibility APIs.
+
+- [x] **Smart Cropping (`fit=smart`)**: Entropy/attention-based cropping utilizing libvips `InterestingAttention`.
+- [x] **Redis Cache Backend**: Stateless and horizontally scalable caching layer across multiple pods/nodes.
+- [x] **Helm Chart & Kubernetes manifests**: Production-ready helm installation and configuration values for B2B/Cloud deployments.
+- [ ] Storage Driver interface finalized and documented for external
   contributors (additional drivers beyond S3-compatible)
-- Runtime Module mechanism decided (see `docs/adr/0003-extensibility-model.md`)
+- [ ] Runtime Module mechanism decided (see `docs/adr/0003-extensibility-model.md`)
   and documented
-- Additional Deployment Adapters (Cloudflare, AWS, Kubernetes) — each
+- [ ] Additional Deployment Adapters (Cloudflare, AWS) — each
   documenting explicitly whether it deploys the full runtime or a proxy
   in front of it, per ADR-0002
 

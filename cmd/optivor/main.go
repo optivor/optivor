@@ -8,7 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/optivor/optivor/internal/cache"
 	"github.com/optivor/optivor/internal/cache/fs"
+	"github.com/optivor/optivor/internal/cache/redis"
 	"github.com/optivor/optivor/internal/cli"
 	"github.com/optivor/optivor/internal/config"
 	"github.com/optivor/optivor/internal/pipeline"
@@ -107,10 +109,21 @@ func runServer(configPath string, providerFlag string) {
 		storageDriver = sd
 	}
 
-	cacheStore, err := fs.New(cfg.Cache.FS.Dir, cfg.Cache.FS.MaxSizeMB*1024*1024)
-	if err != nil {
-		logger.Error("Failed to initialize filesystem cache", "error", err)
-		os.Exit(1)
+	var cacheStore cache.Cache
+	if cfg.Cache.Type == "redis" {
+		rc, err := redis.New(cfg.Cache.Redis.Addr, cfg.Cache.Redis.Password, cfg.Cache.Redis.DB, cfg.Cache.Redis.Prefix, cfg.Cache.Redis.TTL)
+		if err != nil {
+			logger.Error("Failed to initialize Redis cache", "error", err)
+			os.Exit(1)
+		}
+		cacheStore = rc
+	} else {
+		fc, err := fs.New(cfg.Cache.FS.Dir, cfg.Cache.FS.MaxSizeMB*1024*1024)
+		if err != nil {
+			logger.Error("Failed to initialize filesystem cache", "error", err)
+			os.Exit(1)
+		}
+		cacheStore = fc
 	}
 
 	pipe := pipeline.NewPipeline()
