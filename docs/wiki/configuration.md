@@ -84,12 +84,26 @@ image:
   max_decode_mb: 64                    # libvips startup memory ceiling
 ```
 
-## Environment Overrides
+## Environment Overrides & Shorthand Matrix
 
-Any configuration field can be overridden using `OPTIVOR_` environment variables with underscore delimiters:
+Optivor supports 100% fileless configuration for PaaS/Serverless deployments.
+
+### Shorthand Environment Variables
+Shorthand variables take highest precedence when connecting cloud storage:
+
+- `OPTIVOR_S3_ENDPOINT` → `storage.s3.endpoint`
+- `OPTIVOR_S3_BUCKET` → `storage.s3.bucket`
+- `OPTIVOR_S3_REGION` → `storage.s3.region`
+- `OPTIVOR_S3_ACCESS_KEY_ID` → `storage.s3.access_key_id`
+- `OPTIVOR_S3_SECRET_ACCESS_KEY` → `storage.s3.secret_access_key`
+
+### Hierarchical Delimited Overrides
+Any nested configuration field can also be overridden using `OPTIVOR_` with double or single underscore delimiters:
 
 - `OPTIVOR_STORAGE_S3_SECRET_ACCESS_KEY` → `storage.s3.secret_access_key`
 - `OPTIVOR_AUTH_SIGNED_URLS_SECRET` → `auth.signed_urls.secret`
 - `OPTIVOR_SERVER_PORT` → `server.port`
 - `OPTIVOR_REMOTE_ENABLED` → `remote.enabled`
-- `OPTIVOR_CRAWLER_ENABLED` → `crawler.enabled`
+
+### Zero-Config Local Storage Fallback Mode
+If no configuration file (`optivor.yaml`) is found and no `OPTIVOR_S3_*` storage parameters are provided, Optivor automatically initializes in Zero-Config Local Storage mode, serving files from `./storage` out-of-the-box.

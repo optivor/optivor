@@ -38,6 +38,9 @@ It is not an image hosting service and does not lock your data into a proprietar
 ---
 
 > [!NOTE]
+> **Zero-Config Local Fallback & 100% Env Var Support:** Optivor V1.1+ boots into instant Zero-Config local storage mode (`./storage`) without cloud credentials or YAML files, and supports 100% environment variable configuration for PaaS/Serverless deployments.
+>
+> [!NOTE]
 > **Multi-Bucket Routing & Access Control:** Optivor V0.6+ supports multi-bucket declarative routing (`buckets[]`) with per-bucket security policies (`public`, `signed`, `private`) and cross-provider failover chains.
 >
 > [!NOTE]
@@ -53,13 +56,37 @@ It is not an image hosting service and does not lock your data into a proprietar
 
 ## 5-Minute Quick Start
 
-### 1. Run Instantly with Docker or Helm (Recommended)
+### 1-Line Shell Installer (Linux & macOS)
+
+Install the precompiled Optivor binary instantly:
+
+```bash
+curl -fsSL https://optivor.app/install.sh | bash
+```
+
+### Instant Zero-Config Local Trial (No Cloud Credentials Required)
+
+Run Optivor in under 10 seconds locally on your machine:
+
+```bash
+# Start Optivor immediately (automatically serves ./storage)
+optivor
+```
+
+Place any test image in `./storage/photo.jpg` and transform instantly:
+```bash
+curl "http://localhost:8080/photo.jpg?w=400&f=webp" --output output.webp
+```
+
+---
+
+### Run with Docker or Helm (Production)
 
 Try Optivor instantly with Docker:
 
 ```bash
 # Try Optivor instantly with Docker (No Go or libvips required)
-docker run -p 8080:8080 -v $(pwd)/optivor.yaml:/etc/optivor/optivor.yaml optivor/optivor:latest
+docker run -p 8080:8080 -v $(pwd)/optivor.yaml:/etc/optivor/optivor.yaml ghcr.io/optivor/optivor:latest
 ```
 
 Or deploy to a Kubernetes cluster using the official Helm chart:
@@ -68,26 +95,30 @@ Or deploy to a Kubernetes cluster using the official Helm chart:
 helm install optivor ./deploy/helm/optivor
 ```
 
-For advanced settings, see the [Kubernetes & Helm Deployment Guide](./docs/deployment/kubernetes.md).
+For PaaS deployments (Railway, Render, Fly.io), see the [PaaS 1-Click Deployment Guide](./docs/deployment/paas-railway-render-fly.md).
 
-#### Advanced: Build from Source (Go Binary)
+---
 
-Ensure `libvips` development headers are installed on your Linux system (`apt install libvips-dev`):
+### 2. Configure `optivor.yaml` via Guided Wizard
 
-```bash
-make build
-./bin/optivor -config ./optivor.yaml
-```
-
-### 2. Configure `optivor.yaml`
-
-Initialize a new `optivor.yaml` configuration file:
+Launch the interactive CLI configuration wizard:
 
 ```bash
-./bin/optivor init
+optivor init --interactive
 ```
 
-Or configure multi-bucket storage routing and presets:
+Or configure via environment variables (100% fileless configuration for PaaS):
+
+```bash
+export OPTIVOR_S3_ENDPOINT="https://s3.us-east-1.amazonaws.com"
+export OPTIVOR_S3_BUCKET="my-prod-bucket"
+export OPTIVOR_S3_ACCESS_KEY_ID="your-access-key"
+export OPTIVOR_S3_SECRET_ACCESS_KEY="your-secret-key"
+
+optivor
+```
+
+Or configure multi-bucket storage routing and presets via `optivor.yaml`:
 
 ```yaml
 server:
@@ -266,7 +297,9 @@ Full reasoning lives in [`docs/adr/`](./docs/adr).
 Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 
 - [Introduction](./docs/wiki/introduction.md) — Framework overview and philosophy
-- [Quick Start Guide](./docs/wiki/quick-start.md) — Setup with Docker and binary
+- [Zero-Config Quickstart Guide](./docs/wiki/zero-config-quickstart.md) — Run Optivor locally in under 10 seconds without cloud credentials
+- [Interactive CLI Wizard Guide](./docs/wiki/cli-wizard-guide.md) — Step-by-step interactive configuration prompt reference
+- [PaaS Deployment Guide (Railway, Render, Fly.io)](./docs/deployment/paas-railway-render-fly.md) — 1-Click PaaS container blueprints & 100% env var deployment
 - [Kubernetes & Helm Deployment Guide](./docs/deployment/kubernetes.md) — Production HA Kubernetes setup and Helm reference
 - [CLI Reference](./docs/wiki/cli-reference.md) — Command and flag reference
 - [Configuration Reference](./docs/wiki/configuration.md) — `optivor.yaml` schema & environment overrides
@@ -274,6 +307,7 @@ Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 - [Edge Integration Guide](./docs/wiki/edge-integration.md) — CDN and Cloudflare Workers setup
 - [Storage Driver Guide](./docs/wiki/storage-drivers.md) — Building & installing custom storage drivers
 - [Storage Driver SDK Specification](./docs/wiki/driver-sdk-specification.md) — Out-of-process IPC protocol specification
+- [ADR-0016: Zero-Config Fallback & Env Override Matrix](./docs/adr/0016-zero-config-fallback-and-env-override-matrix.md) — Precedence hierarchy specification
 - [FAQ](./docs/wiki/faq.md) — Frequently asked questions
 
 ---
