@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "optivor-edge-proxy",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-25",
+  "vars": {
+    "OPTIVOR_UPSTREAM_URL": "https://optivor.yourdomain.com"
+  }
+}
