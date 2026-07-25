@@ -1,0 +1,17 @@
+{{- if and (eq .Values.config.cache.type "fs") .Values.config.cache.fs.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "optivor.fullname" . }}-cache
+  labels:
+    {{- include "optivor.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.config.cache.fs.persistence.accessMode | default "ReadWriteOnce" }}
+  resources:
+    requests:
+      storage: {{ .Values.config.cache.fs.persistence.size | default "10Gi" }}
+  {{- if .Values.config.cache.fs.persistence.storageClass }}
+  storageClassName: {{ .Values.config.cache.fs.persistence.storageClass }}
+  {{- end }}
+{{- end }}
