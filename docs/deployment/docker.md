@@ -65,3 +65,18 @@ docker-compose up -d
 ```
 
 The reference `docker-compose.yml` mounts `./optivor.yaml.example` to `/etc/optivor/optivor.yaml` inside the container and configures standard health checks.
+
+---
+
+## 5. Cloudflare Edge CDN Integration
+
+To place a global Cloudflare Edge CDN in front of your Docker container:
+
+1. Expose your Docker host port `8080` behind Nginx, Caddy, or a Cloudflare Tunnel domain (e.g. `https://optivor-origin.yourdomain.com`).
+2. Update `deploy/cloudflare/wrangler.jsonc`:
+   ```json
+   "vars": {
+     "OPTIVOR_UPSTREAM_URL": "https://optivor-origin.yourdomain.com"
+   }
+   ```
+3. Deploy the Worker using `npx wrangler deploy`. Requests will be cached at the Cloudflare Edge with sub-10ms response times.
