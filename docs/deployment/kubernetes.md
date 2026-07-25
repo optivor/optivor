@@ -82,3 +82,24 @@ The secret `optivor-production-secrets` should contain the following fields:
 *   `OPTIVOR_STORAGE_S3_SECRET_ACCESS_KEY`: Secret access key for the global S3 storage bucket.
 *   `OPTIVOR_CACHE_REDIS_PASSWORD`: Optional Redis password.
 *   `OPTIVOR_AUTH_SIGNED_URLS_SECRET`: HMAC secret (if URL signature verification is enabled).
+
+---
+
+## 6. Cloudflare Edge CDN Integration
+
+To pair your Kubernetes cluster with Cloudflare Workers as a global Edge CDN:
+
+1. Expose your Kubernetes Ingress controller (`optivor-origin.yourdomain.com`).
+2. Deploy the Cloudflare Worker adapter in `deploy/cloudflare`:
+   ```json
+   // deploy/cloudflare/wrangler.jsonc
+   {
+     "name": "optivor-edge-cdn",
+     "main": "worker.js",
+     "compatibility_date": "2026-07-25",
+     "vars": {
+       "OPTIVOR_UPSTREAM_URL": "https://optivor-origin.yourdomain.com"
+     }
+   }
+   ```
+3. Run `npx wrangler deploy` to cache transformed images at global edge locations.
