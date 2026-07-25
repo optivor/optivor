@@ -263,7 +263,7 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 	fitStr := strings.ToLower(q.Get("fit"))
 	if fitStr != "" {
 		switch pipeline.FitMode(fitStr) {
-		case pipeline.FitCover, pipeline.FitContain, pipeline.FitFill:
+		case pipeline.FitCover, pipeline.FitContain, pipeline.FitFill, pipeline.FitSmart:
 			params.Fit = pipeline.FitMode(fitStr)
 		default:
 			return params, fmt.Errorf("invalid 'fit' mode parameter: %s", fitStr)

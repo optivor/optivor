@@ -22,6 +22,7 @@ const (
 	FitCover   FitMode = "cover"
 	FitContain FitMode = "contain"
 	FitFill    FitMode = "fill"
+	FitSmart   FitMode = "smart"
 )
 
 type TransformParams struct {

@@ -20,7 +20,7 @@ func ApplyPreset(preset config.PresetConfig, params TransformParams) TransformPa
 	if preset.Fit != "" && params.Fit == "" {
 		fitStr := strings.ToLower(preset.Fit)
 		switch FitMode(fitStr) {
-		case FitCover, FitContain, FitFill:
+		case FitCover, FitContain, FitFill, FitSmart:
 			params.Fit = FitMode(fitStr)
 		}
 	}

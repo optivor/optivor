@@ -74,7 +74,7 @@ func TestPipeline_ResizeWebP(t *testing.T) {
 	pipe := pipeline.NewPipeline()
 	ctx := context.Background()
 
-	modes := []pipeline.FitMode{pipeline.FitCover, pipeline.FitContain, pipeline.FitFill}
+	modes := []pipeline.FitMode{pipeline.FitCover, pipeline.FitContain, pipeline.FitFill, pipeline.FitSmart}
 	for _, mode := range modes {
 		t.Run(string(mode), func(t *testing.T) {
 			params := pipeline.TransformParams{
