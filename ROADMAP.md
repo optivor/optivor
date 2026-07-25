@@ -94,6 +94,15 @@ Goal: Professional-grade horizontal scaling, B2B deployment primitives, smart me
 - [ ] Additional Deployment Adapters (Cloudflare, AWS) — each
   documenting explicitly whether it deploys the full runtime or a proxy
   in front of it, per ADR-0002
+- [ ] **Enterprise IAM & Dynamic Access Control**:
+  - [ ] Support AWS IRSA (IAM Roles for Service Accounts) and GKE Workload Identity natively (token credential providers instead of static keys).
+  - [ ] Implement client-level API-Key token authorization policies with bucket-level operation scopes (read/write/lifecycle).
+  - [ ] Implement Dynamic Signed URL delegation with HMAC secret validation for private bucket isolation.
+- [ ] **Production Infrastructure Hardening**:
+  - [ ] Add `NetworkPolicy` to the Helm Chart to restrict outbound pod traffic to whitelisted endpoints.
+  - [ ] Implement Redis connection pool sizing controls and a circuit-breaker for graceful S3 fallback when Redis goes offline.
+  - [ ] Add custom Prometheus `/metrics` endpoint (exposing request latencies, libvips cache utilization, and Redis pool stats).
+  - [ ] Add `checksum/config` annotation to the Helm Deployment pod template for automatic rolling config updates.
 
 ## Explicitly not scheduled
 
