@@ -58,6 +58,9 @@ ingress:
   #    hosts:
   #      - optivor.local
 
+networkPolicy:
+  enabled: false
+
 resources:
   # Limits are crucial because libvips is heavy on multi-threaded CPU and memory
   limits:
