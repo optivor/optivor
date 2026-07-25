@@ -68,3 +68,27 @@ func TestRunInit(t *testing.T) {
 		})
 	}
 }
+
+func TestRunInitInteractive(t *testing.T) {
+	tempDir := t.TempDir()
+	origWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get current working directory: %v", err)
+	}
+	defer func() {
+		_ = os.Chdir(origWd)
+	}()
+
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to chdir to tempDir: %v", err)
+	}
+
+	if err := RunInitInteractive(false); err != nil {
+		t.Fatalf("expected RunInitInteractive to succeed, got %v", err)
+	}
+
+	target := filepath.Join(tempDir, "optivor.yaml")
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		t.Errorf("expected optivor.yaml to exist after RunInitInteractive")
+	}
+}
