@@ -1,6 +1,6 @@
 module github.com/optivor/optivor
 
-go 1.25.0
+go 1.25
 
 require (
 	github.com/davidbyttow/govips/v2 v2.18.0
