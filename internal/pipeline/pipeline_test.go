@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"image/jpeg"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/davidbyttow/govips/v2/vips"
@@ -155,6 +156,9 @@ func TestPipeline_AVIF(t *testing.T) {
 
 	res, contentType, err := pipe.Run(ctx, driver, "sample.jpg", params)
 	if err != nil {
+		if strings.Contains(err.Error(), "Unsupported compression") || strings.Contains(err.Error(), "heifsave") {
+			t.Skipf("AVIF encoder not supported by system libvips build: %v", err)
+		}
 		t.Fatalf("avif export failed: %v", err)
 	}
 
