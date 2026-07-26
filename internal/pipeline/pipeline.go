@@ -98,7 +98,7 @@ func (p *Pipeline) Run(ctx context.Context, driver storage.StorageDriver, key st
 
 // TransformBytes transforms raw image bytes directly.
 func (p *Pipeline) TransformBytes(ctx context.Context, data []byte, params TransformParams) ([]byte, string, error) {
-	ctx, span := otel.Tracer("optivor").Start(ctx, "pipeline.TransformBytes")
+	_, span := otel.Tracer("optivor").Start(ctx, "pipeline.TransformBytes")
 	defer span.End()
 
 	// If no transformation, filter, overlay or format change is requested, passthrough original image bytes
