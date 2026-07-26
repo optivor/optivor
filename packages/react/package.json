@@ -1,9 +1,18 @@
 {
   "name": "@optivor/react",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Official React SDK & Image component for Optivor image engine",
   "main": "index.js",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/optivor/optivor.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/optivor/optivor#readme",
+  "bugs": {
+    "url": "https://github.com/optivor/optivor/issues"
+  },
   "keywords": [
     "optivor",
     "react-image",
@@ -23,6 +32,6 @@
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@optivor/js": "^1.2.3"
+    "@optivor/js": "^1.2.4"
   }
 }

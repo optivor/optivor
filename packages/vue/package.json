@@ -1,9 +1,18 @@
 {
   "name": "@optivor/vue",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Official Vue 3 & Nuxt component for Optivor image engine",
   "main": "index.js",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/optivor/optivor.git",
+    "directory": "packages/vue"
+  },
+  "homepage": "https://github.com/optivor/optivor#readme",
+  "bugs": {
+    "url": "https://github.com/optivor/optivor/issues"
+  },
   "keywords": [
     "optivor",
     "vue-image",
@@ -22,6 +31,6 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@optivor/js": "^1.2.3"
+    "@optivor/js": "^1.2.4"
   }
 }
