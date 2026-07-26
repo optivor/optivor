@@ -86,3 +86,137 @@ Generated HTML:
   loading="lazy"
 />
 ```
+
+---
+
+## 5. Ecosystem SDK Usage Guides
+
+### JavaScript / TypeScript (`@optivor/js`)
+
+```bash
+npm install @optivor/js
+```
+
+```javascript
+import { OptivorClient } from '@optivor/js';
+
+const optivor = new OptivorClient({
+  baseUrl: 'https://optivor.example.com',
+  defaultBucket: 's3-bucket'
+});
+
+const url = optivor.buildUrl('users/avatar.jpg', {
+  width: 300,
+  height: 300,
+  fit: 'focal',
+  focal: [0.3, 0.7],
+  format: 'webp',
+  overlay: 'watermark.png',
+  gravity: 'bottom_right',
+  opacity: 50,
+  blur: 5
+});
+```
+
+### React (`@optivor/react`)
+
+```bash
+npm install @optivor/react @optivor/js
+```
+
+```jsx
+import { OptivorImage } from '@optivor/react';
+
+export default function App() {
+  return (
+    <OptivorImage
+      baseUrl="https://optivor.example.com"
+      src="products/shoe.jpg"
+      width={400}
+      height={300}
+      fit="cover"
+      format="webp"
+      overlay="logo.png"
+      gravity="bottom_right"
+      opacity={50}
+      alt="Sports Shoe"
+    />
+  );
+}
+```
+
+### Vue 3 / Nuxt (`@optivor/vue`)
+
+```bash
+npm install @optivor/vue @optivor/js
+```
+
+```vue
+<template>
+  <OptivorImage
+    base-url="https://optivor.example.com"
+    src="products/camera.jpg"
+    :width="600"
+    :height="400"
+    fit="cover"
+    format="avif"
+    alt="Digital Camera"
+  />
+</template>
+
+<script setup>
+import { OptivorImage } from '@optivor/vue';
+</script>
+```
+
+### Next.js Custom Loader (`@optivor/next`)
+
+```bash
+npm install @optivor/next
+```
+
+```tsx
+import { Image } from '@optivor/next';
+
+export default function Page() {
+  return <Image src="/hero.png" width={1200} height={800} alt="Hero" />;
+}
+```
+
+### Python (`optivor`)
+
+```bash
+pip install optivor
+```
+
+```python
+from optivor import OptivorClient
+
+optivor = OptivorClient("https://optivor.example.com", "my-bucket")
+url = optivor.build_url(
+    "photos/landscape.jpg",
+    width=800,
+    height=600,
+    fit="focal",
+    focal=(0.4, 0.6),
+    format="webp",
+    blur=10
+)
+```
+
+### PHP (`optivor-php`)
+
+```php
+use Optivor\OptivorClient;
+
+$optivor = new OptivorClient('https://optivor.example.com', 's3-bucket');
+$url = $optivor->url('products/shoes.jpg', [
+    'width' => 600,
+    'height' => 400,
+    'fit' => 'cover',
+    'format' => 'webp',
+    'overlay' => 'watermark.png',
+    'opacity' => 50,
+]);
+```
+

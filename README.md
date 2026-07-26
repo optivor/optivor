@@ -191,34 +191,61 @@ curl -i "http://localhost:8080/fetch?url=https://example.com/photo.png&w=600&for
 
 Response returns `Content-Type: image/webp` and `X-Optivor-Cache: MISS` (or `HIT` on subsequent requests).
 
-### 4. Zero-Config Next.js Integration (`@optivor/next`)
+### 4. Official Ecosystem Client SDKs
 
-Use the official Optivor React component directly in Next.js App Router or Pages Router apps:
+Optivor provides official SDK packages for seamless frontend and backend framework integration:
 
-```bash
-npm install @optivor/next
-```
+| Ecosystem / Platform | Package Identifier | Registry Link | Quick Installation |
+| :--- | :--- | :--- | :--- |
+| **React / Next.js** | `@optivor/react` | [npm](https://www.npmjs.com/package/@optivor/react) | `npm install @optivor/react @optivor/js` |
+| **Vue 3 / Nuxt** | `@optivor/vue` | [npm](https://www.npmjs.com/package/@optivor/vue) | `npm install @optivor/vue @optivor/js` |
+| **JavaScript / TS** | `@optivor/js` | [npm](https://www.npmjs.com/package/@optivor/js) | `npm install @optivor/js` |
+| **Next.js Loader** | `@optivor/next` | [npm](https://www.npmjs.com/package/@optivor/next) | `npm install @optivor/next` |
+| **Python** | `optivor` | [PyPI](https://pypi.org/project/optivor/) | `pip install optivor` |
+| **PHP / Laravel** | `optivor-php` | Local / GitHub | `packages/php` |
 
-Set your environment variable:
+#### Quick Examples:
 
-```env
-NEXT_PUBLIC_OPTIVOR_URL=https://optivor.example.com
-```
-
+**React (`@optivor/react`)**
 ```tsx
-import { Image } from '@optivor/next';
+import { OptivorImage } from '@optivor/react';
 
-export default function Page() {
-  return (
-    <Image
-      src="/hero.png"
-      width={1200}
-      height={800}
-      alt="Hero Image"
-    />
-  );
-}
+<OptivorImage
+  baseUrl="https://optivor.example.com"
+  src="products/shoe.jpg"
+  width={400}
+  height={300}
+  fit="cover"
+  format="webp"
+  overlay="logo.png"
+  gravity="bottom_right"
+  opacity={50}
+  alt="Sports Shoe"
+/>
 ```
+
+**Vue (`@optivor/vue`)**
+```vue
+<OptivorImage
+  base-url="https://optivor.example.com"
+  src="avatars/john.jpg"
+  :width="200"
+  :height="200"
+  fit="focal"
+  :focal="[0.3, 0.7]"
+  format="avif"
+/>
+```
+
+**Python (`optivor`)**
+```python
+from optivor import OptivorClient
+
+optivor = OptivorClient("https://optivor.example.com", "prod-bucket")
+url = optivor.build_url("photos/hero.jpg", width=800, height=600, format="webp", blur=10)
+```
+
+---
 
 ### 5. Health Check & Diagnostics
 
@@ -299,6 +326,8 @@ Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 - [Introduction](./docs/wiki/introduction.md) — Framework overview and philosophy
 - [Zero-Config Quickstart Guide](./docs/wiki/zero-config-quickstart.md) — Run Optivor locally in under 10 seconds without cloud credentials
 - [Interactive CLI Wizard Guide](./docs/wiki/cli-wizard-guide.md) — Step-by-step interactive configuration prompt reference
+- [Watermarking & Image Effects Guide](./docs/wiki/watermarking-and-effects.md) — Dynamic watermarks, overlays, focal crop, and image filters
+- [Official Client SDK Specification](./docs/wiki/client-sdk-specification.md) — Standardized framework SDK contract for JS, React, Vue, PHP, Python
 - [PaaS Deployment Guide (Railway, Render, Fly.io)](./docs/deployment/paas-railway-render-fly.md) — 1-Click PaaS container blueprints & 100% env var deployment
 - [Kubernetes & Helm Deployment Guide](./docs/deployment/kubernetes.md) — Production HA Kubernetes setup and Helm reference
 - [CLI Reference](./docs/wiki/cli-reference.md) — Command and flag reference
@@ -308,6 +337,7 @@ Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 - [Storage Driver Guide](./docs/wiki/storage-drivers.md) — Building & installing custom storage drivers
 - [Storage Driver SDK Specification](./docs/wiki/driver-sdk-specification.md) — Out-of-process IPC protocol specification
 - [ADR-0016: Zero-Config Fallback & Env Override Matrix](./docs/adr/0016-zero-config-fallback-and-env-override-matrix.md) — Precedence hierarchy specification
+- [ADR-0017: Watermarking Overlays and Focal Crop](./docs/adr/0017-watermarking-overlays-and-focal-crop.md) — libvips compositing & focal point calculation specification
 - [FAQ](./docs/wiki/faq.md) — Frequently asked questions
 
 ---
