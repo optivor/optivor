@@ -4,6 +4,9 @@
 
 [![npm version](https://img.shields.io/npm/v/@optivor/vue.svg)](https://www.npmjs.com/package/@optivor/vue)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/optivor/optivor.svg?style=social)](https://github.com/optivor/optivor)
+
+⭐ **If you find Optivor useful, please consider giving us a [Star on GitHub](https://github.com/optivor/optivor)!**
 
 `<OptivorImage />` is a Vue 3 component for seamless integration with Optivor dynamic image processing servers.
 
@@ -77,6 +80,14 @@ import { OptivorImage } from '@optivor/vue';
   />
 </template>
 ```
+
+---
+
+## Watermark Security & Tamper Protection
+
+To ensure watermarks cannot be stripped by removing props or query parameters in public applications:
+- **Server Presets (`preset`)**: Pass `preset="watermarked_thumb"` to `<OptivorImage />`. Presets are resolved on the Optivor server without exposing overlay parameters in client URLs.
+- **Signed URLs**: When URL signing is enabled on your server, HMAC signatures lock all parameters. Any attempt to modify or remove `overlay` parameters causes a `403 Forbidden` response.
 
 ---
 

@@ -4,6 +4,9 @@
 
 [![npm version](https://img.shields.io/npm/v/@optivor/react.svg)](https://www.npmjs.com/package/@optivor/react)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/optivor/optivor.svg?style=social)](https://github.com/optivor/optivor)
+
+⭐ **If you find Optivor useful, please consider giving us a [Star on GitHub](https://github.com/optivor/optivor)!**
 
 `<OptivorImage />` provides automatic responsive `srcset` generation, lazy loading, and zero-config Optivor URL formatting for React applications.
 
@@ -70,6 +73,14 @@ export default function UserCard() {
   alt="Sports Shoe"
 />
 ```
+
+---
+
+## Watermark Security & Anti-Tamper Protection
+
+To ensure watermarks cannot be stripped by removing props or query parameters in public applications:
+- **Server Presets (`preset`)**: Pass `preset="watermarked_thumb"` to `<OptivorImage />`. Presets are resolved on the Optivor server without exposing overlay parameters in client URLs.
+- **Signed URLs**: When URL signing is enabled on your server, HMAC signatures lock all parameters. Any attempt to modify or remove `overlay` parameters causes a `403 Forbidden` response.
 
 ---
 
