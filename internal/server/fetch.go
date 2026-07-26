@@ -87,7 +87,7 @@ func validateAndBuildRemoteURL(rawURL string, allowedDomains []string) (string, 
 }
 
 func (s *Server) handleFetch(w http.ResponseWriter, r *http.Request) {
-	if s.cfg.Remote.Enabled == false {
+	if !s.cfg.Remote.Enabled {
 		http.Error(w, "remote image fetching is disabled", http.StatusForbidden)
 		return
 	}
