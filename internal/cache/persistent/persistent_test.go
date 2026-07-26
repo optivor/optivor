@@ -27,7 +27,7 @@ func TestPersistentCache_SetAndGet(t *testing.T) {
 	contentType := "image/webp"
 
 	// 1. Get non-existent
-	data, cType, hit, err := pc.Get(ctx, key, params)
+	_, _, hit, err := pc.Get(ctx, key, params)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestPersistentCache_SetAndGet(t *testing.T) {
 	}
 
 	// 3. Get hit
-	data, cType, hit, err = pc.Get(ctx, key, params)
+	data, cType, hit, err := pc.Get(ctx, key, params)
 	if err != nil {
 		t.Fatalf("unexpected error on get: %v", err)
 	}

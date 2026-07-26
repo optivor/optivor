@@ -57,7 +57,7 @@ func TestDriverSubcommands(t *testing.T) {
 		}
 
 		var outBuf bytes.Buffer
-		outBuf.ReadFrom(r)
+		_, _ = outBuf.ReadFrom(r)
 		outStr := outBuf.String()
 		if !strings.Contains(outStr, "test-r2") || !strings.Contains(outStr, "1.0.0") {
 			t.Errorf("expected output to contain 'test-r2' and '1.0.0', got: %s", outStr)
@@ -80,7 +80,7 @@ func TestDriverSubcommands(t *testing.T) {
 		}
 
 		var outBuf bytes.Buffer
-		outBuf.ReadFrom(r)
+		_, _ = outBuf.ReadFrom(r)
 		outStr := outBuf.String()
 		if !strings.Contains(outStr, "Name:        test-r2") {
 			t.Errorf("expected info output to contain 'Name:        test-r2', got: %s", outStr)

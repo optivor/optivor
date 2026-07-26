@@ -57,6 +57,7 @@ func (s *Server) SetBucketRouter(r router.BucketRouter) {
 func (s *Server) setupRouter() {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
+	//nolint:staticcheck // Chi RealIP middleware used internally behind reverse proxy
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	if s.cfg.Server.RequestTimeout > 0 {
