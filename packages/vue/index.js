@@ -5,6 +5,7 @@ const OptivorImage = defineComponent({
   name: 'OptivorImage',
   props: {
     src: { type: String, required: true },
+    preset: { type: String, default: undefined },
     width: { type: Number, default: undefined },
     height: { type: Number, default: undefined },
     fit: { type: String, default: 'cover' },
@@ -22,7 +23,7 @@ const OptivorImage = defineComponent({
   setup(props, { attrs }) {
     const client = new OptivorClient({ baseUrl: props.baseUrl });
     return () => {
-      const url = client.buildUrl(props.src, {
+      const params = {
         width: props.width,
         height: props.height,
         fit: props.fit,
@@ -34,7 +35,10 @@ const OptivorImage = defineComponent({
         blur: props.blur,
         grayscale: props.grayscale,
         pixelate: props.pixelate
-      });
+      };
+      const url = props.preset 
+        ? client.buildPresetUrl(props.preset, props.src, params)
+        : client.buildUrl(props.src, params);
 
       return h('img', {
         src: url,

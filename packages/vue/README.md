@@ -17,6 +17,23 @@ npm install @optivor/vue @optivor/js
 pnpm add @optivor/vue @optivor/js
 ```
 
+### Preset-Based Usage (Recommended)
+
+```vue
+<template>
+  <OptivorImage
+    base-url="https://optivor.example.com"
+    preset="avatar"
+    src="users/john.jpg"
+    alt="User Avatar"
+  />
+</template>
+
+<script setup>
+import { OptivorImage } from '@optivor/vue';
+</script>
+```
+
 ---
 
 ## Basic Usage
@@ -68,6 +85,7 @@ import { OptivorImage } from '@optivor/vue';
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `src` | `String` | **(Required)** | Image storage key. |
+| `preset` | `String` | `undefined` | Server preset name (e.g. `avatar`, `profile`, `hero`). |
 | `baseUrl` / `base-url` | `String` | `'http://localhost:8080'` | Optivor server URL. |
 | `width` | `Number` | `undefined` | Target width in pixels. |
 | `height` | `Number` | `undefined` | Target height in pixels. |

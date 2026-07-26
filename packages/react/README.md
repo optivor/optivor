@@ -17,6 +17,18 @@ npm install @optivor/react @optivor/js
 pnpm add @optivor/react @optivor/js
 ```
 
+### Preset-Based Usage (Recommended)
+
+```jsx
+// Use server-side preset (e.g. /preset/avatar/users/alex.jpg)
+<OptivorImage
+  baseUrl="https://optivor.example.com"
+  preset="avatar"
+  src="users/alex.jpg"
+  alt="User Avatar"
+/>
+```
+
 ---
 
 ## Usage
@@ -66,6 +78,7 @@ export default function UserCard() {
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `src` | `string` | **(Required)** | Image key or path in Optivor storage. |
+| `preset` | `string` | `undefined` | Optivor server preset name (e.g. `avatar`, `profile`, `thumb`). |
 | `baseUrl` | `string` | `'http://localhost:8080'` | Base URL of your Optivor server. |
 | `width` | `number` | `undefined` | Display & target width in pixels. Generates `srcset` automatically. |
 | `height` | `number` | `undefined` | Target height in pixels. |
