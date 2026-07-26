@@ -21,11 +21,13 @@ optivor.local.yaml
 .vscode/
 
 # Python & Package Builds
+packages/python/.venv/
+packages/python/dist/
+packages/python/optivor.egg-info/
 .venv/
 venv/
 env/
-*.egg-info/
+*.egg-info
 build/
 dist/
-packages/*/dist/
 __pycache__/
