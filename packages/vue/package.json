@@ -1,6 +1,6 @@
 {
   "name": "@optivor/vue",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Official Vue 3 & Nuxt component for Optivor image engine",
   "main": "index.js",
   "license": "Apache-2.0",
@@ -8,6 +8,6 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@optivor/js": "^1.2.0"
+    "@optivor/js": "^1.2.2"
   }
 }
