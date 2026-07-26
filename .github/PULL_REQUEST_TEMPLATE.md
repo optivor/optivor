@@ -1,29 +1,22 @@
-## What does this PR do
+## 📝 Description
+Provide a concise summary of the changes introduced in this Pull Request.
 
-Brief description of the change.
+## 🔗 Related Issue
+Fixes #(issue number) or Closes #(issue number)
 
-## Related issue
+## 🗂️ Type of Change
+- [ ] 🐛 Bug fix (non-breaking change fixing an issue)
+- [ ] 🚀 New feature (non-breaking change adding functionality)
+- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] 📚 Documentation / Wiki update
+- [ ] 📦 SDK / Monorepo package update (`@optivor/js`, `react`, `vue`, `next`, `python`, `php`)
 
-Closes #
+## 🎯 Target Branch
+- [ ] **`staging`** (Required: All PRs must target `staging`, not `main`)
 
-## Scope check
-
-- [ ] This change fits within the current milestone (see
-      `docs/adr/0000-project-scope.md` / `ROADMAP.md`)
-- [ ] This change does not cross a layer boundary it shouldn't (see
-      `docs/adr/0002-high-level-architecture.md`) — e.g., Runtime does
-      not import a Deployment Adapter, a Storage Driver does not import
-      the Runtime
-- [ ] If this introduces or changes an extension point, it references or
-      adds an ADR rather than only being described in this PR
-
-## Testing
-
-How was this tested? For Runtime or Storage Driver changes, tests are
-expected — describe what's covered.
-
-## Documentation
-
-- [ ] Relevant docs updated in this PR (not deferred to a follow-up)
-
-## Anything else reviewers should know
+## 🧪 Checklist & Verification
+- [ ] Code compiles cleanly (`make build`)
+- [ ] All unit and integration tests pass (`go test ./... -race -cover`)
+- [ ] Static analysis tools pass (`golangci-lint run` and `govulncheck ./...`)
+- [ ] Relevant documentation updated (`README.md` or `docs/wiki`)
+- [ ] Commit message follows Conventional Commits specification (`feat`, `fix`, `docs`, `bump`)

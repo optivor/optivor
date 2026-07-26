@@ -1,35 +1,34 @@
 ---
-name: Feature request
-about: Propose new functionality
-title: "[Feature] "
+name: "🚀 Feature Request"
+about: Propose a new feature, enhancement, transformation parameter, or SDK functionality
+title: "[Feature]: "
 labels: enhancement
+assignees: ''
 ---
 
-## What problem does this solve
+## 💡 Is your feature request related to a problem?
+A clear description of what the problem is. Ex. *I'm always frustrated when...*
 
-Describe the problem or limitation you're running into. Focus on the
-problem before the solution.
+## ✨ Proposed Solution & Feature Description
+A clear and concise description of what you want to happen. Explain the proposed API, configuration parameters, or URL syntax.
 
-## Proposed solution
+## 🧱 Component Impact
+Which part of the project will this feature touch?
+- [ ] Go Server Engine & Image Pipeline (`internal/pipeline`, `internal/server`)
+- [ ] Storage Drivers (`internal/storage`)
+- [ ] Cache Backend (`internal/cache`)
+- [ ] CLI & Management Tools (`cmd/optivor`)
+- [ ] Frontend & Client SDKs (`@optivor/js`, `@optivor/react`, `@optivor/vue`, `@optivor/next`, `python`, `php`)
+- [ ] Documentation / Wiki
 
-What you'd like to see happen.
+## 📜 Example Usage / Proposed Syntax
+```bash
+# Example curl request or SDK call
+curl "https://optivor.example.com/image/bucket/photo.jpg?w=800&new_param=value"
+```
 
-## Scope check
+## 🔄 Alternatives Considered
+A description of any alternative solutions or features you've considered.
 
-Have you checked
-[`docs/adr/0000-project-scope.md`](../../docs/adr/0000-project-scope.md)
-and [`ROADMAP.md`](../../ROADMAP.md)?
-
-- [ ] This fits within the current milestone's scope
-- [ ] This is intentionally proposing something outside current scope,
-      and I understand it will be scheduled for a future milestone
-      rather than merged immediately
-
-## Alternatives considered
-
-Any other approaches you thought about, and why you didn't propose them
-instead.
-
-## Additional context
-
-Anything else relevant — related issues, prior art in other tools, etc.
+## 📌 Additional Context
+Add any other context, screenshots, or reference links (e.g., Cloudinary/Imgix equivalents).
