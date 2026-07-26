@@ -42,6 +42,11 @@ func applyResize(img *vips.ImageRef, params TransformParams) error {
 	}
 
 	switch params.Fit {
+	case FitFocal:
+		if err := applyFocalCrop(img, targetW, targetH, params.FocalX, params.FocalY); err != nil {
+			return fmt.Errorf("failed focal crop: %w", err)
+		}
+
 	case FitCover:
 		// Center crop resize
 		if err := img.Thumbnail(targetW, targetH, vips.InterestingCentre); err != nil {

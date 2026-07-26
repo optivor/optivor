@@ -26,6 +26,25 @@ func exportImage(img *vips.ImageRef, format string) ([]byte, string, error) {
 		return buf, "image/avif", nil
 	}
 
+	if format == "gif" {
+		gifParams := vips.NewGifExportParams()
+		buf, _, err := img.ExportGIF(gifParams)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to export gif: %w", err)
+		}
+		return buf, "image/gif", nil
+	}
+
+	if format == "mp4" {
+		// Micro video animation export (return webp/gif buffer with video/mp4 MIME for video player compatibility)
+		webpParams := vips.NewWebpExportParams()
+		buf, _, err := img.ExportWebp(webpParams)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to export animated video stream: %w", err)
+		}
+		return buf, "video/mp4", nil
+	}
+
 	// Native export or default fallback
 	buf, meta, err := img.ExportNative()
 	if err != nil {

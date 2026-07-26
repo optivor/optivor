@@ -263,7 +263,7 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 	fitStr := strings.ToLower(q.Get("fit"))
 	if fitStr != "" {
 		switch pipeline.FitMode(fitStr) {
-		case pipeline.FitCover, pipeline.FitContain, pipeline.FitFill, pipeline.FitSmart:
+		case pipeline.FitCover, pipeline.FitContain, pipeline.FitFill, pipeline.FitSmart, pipeline.FitFocal:
 			params.Fit = pipeline.FitMode(fitStr)
 		default:
 			return params, fmt.Errorf("invalid 'fit' mode parameter: %s", fitStr)
@@ -272,12 +272,58 @@ func (s *Server) parseQueryParams(r *http.Request) (pipeline.TransformParams, er
 		params.Fit = pipeline.FitCover
 	}
 
+	if focalStr := q.Get("focal"); focalStr != "" {
+		parts := strings.Split(focalStr, ",")
+		if len(parts) == 2 {
+			fx, err1 := strconv.ParseFloat(strings.TrimSpace(parts[0]), 64)
+			fy, err2 := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
+			if err1 == nil && err2 == nil {
+				params.FocalX = fx
+				params.FocalY = fy
+				params.Fit = pipeline.FitFocal
+			}
+		}
+	}
+
 	fmtStr := strings.ToLower(q.Get("format"))
 	if fmtStr != "" {
-		if fmtStr != "webp" && fmtStr != "avif" {
+		if fmtStr != "webp" && fmtStr != "avif" && fmtStr != "gif" && fmtStr != "mp4" {
 			return params, fmt.Errorf("unsupported 'format' parameter: %s", fmtStr)
 		}
 		params.Format = fmtStr
+	}
+
+	// Dynamic Watermarking & Overlays
+	if overlay := q.Get("overlay"); overlay != "" {
+		params.Overlay = overlay
+	}
+	if gravity := q.Get("gravity"); gravity != "" {
+		params.Gravity = gravity
+	}
+	if opacityStr := q.Get("opacity"); opacityStr != "" {
+		if op, err := strconv.ParseFloat(opacityStr, 64); err == nil {
+			params.Opacity = op
+		}
+	}
+	if scaleStr := q.Get("overlay_scale"); scaleStr != "" {
+		if sc, err := strconv.ParseFloat(scaleStr, 64); err == nil {
+			params.OverlayScale = sc
+		}
+	}
+
+	// Image Filters
+	if blurStr := q.Get("blur"); blurStr != "" {
+		if b, err := strconv.ParseFloat(blurStr, 64); err == nil && b > 0 {
+			params.Blur = b
+		}
+	}
+	if gsStr := q.Get("grayscale"); gsStr != "" {
+		params.Grayscale = strings.ToLower(gsStr) == "true" || gsStr == "1"
+	}
+	if pxStr := q.Get("pixelate"); pxStr != "" {
+		if px, err := strconv.Atoi(pxStr); err == nil && px > 1 {
+			params.Pixelate = px
+		}
 	}
 
 	return params, nil

@@ -144,7 +144,7 @@ func TestImageRoute_ValidationErrors(t *testing.T) {
 		{"WidthExceedsMax", "/image/img.jpg?w=5000"},
 		{"NegativeWidth", "/image/img.jpg?w=-10"},
 		{"InvalidFit", "/image/img.jpg?fit=unknown"},
-		{"InvalidFormat", "/image/img.jpg?format=gif"},
+		{"InvalidFormat", "/image/img.jpg?format=invalid"},
 	}
 
 	for _, tc := range testCases {

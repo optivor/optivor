@@ -23,15 +23,32 @@ const (
 	FitContain FitMode = "contain"
 	FitFill    FitMode = "fill"
 	FitSmart   FitMode = "smart"
+	FitFocal   FitMode = "focal"
 )
 
 type TransformParams struct {
 	Width                  int
 	Height                 int
 	Fit                    FitMode
-	Format                 string // "webp" or ""
+	Format                 string // "webp", "avif", "gif", "mp4" or ""
 	ContainBackgroundColor string // e.g. "#ffffff"
 	MaxPixels              int
+
+	// Manual Focal Point Cropping (focal=x,y normalized 0.0-1.0)
+	FocalX float64
+	FocalY float64
+
+	// Dynamic Watermarking & Overlays
+	Overlay      string
+	OverlayBytes []byte
+	Gravity      string
+	Opacity      float64
+	OverlayScale float64
+
+	// Image Filters
+	Blur      float64
+	Grayscale bool
+	Pixelate  int
 }
 
 var (
@@ -84,13 +101,17 @@ func (p *Pipeline) TransformBytes(ctx context.Context, data []byte, params Trans
 	ctx, span := otel.Tracer("optivor").Start(ctx, "pipeline.TransformBytes")
 	defer span.End()
 
-	// If no transformation or format change is requested, passthrough original image bytes
-	if params.Width <= 0 && params.Height <= 0 && params.Format == "" {
+	// If no transformation, filter, overlay or format change is requested, passthrough original image bytes
+	if params.Width <= 0 && params.Height <= 0 && params.Format == "" &&
+		!params.Grayscale && params.Blur <= 0 && params.Pixelate <= 1 && len(params.OverlayBytes) == 0 {
 		return data, detectContentType(data), nil
 	}
 
 	// 2. Transform image using govips
 	importParams := vips.NewImportParams()
+	// Load all frames for animated image support
+	importParams.NumPages.Set(-1)
+
 	img, err := vips.LoadImageFromBuffer(data, importParams)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to decode source image: %w", err)
@@ -105,6 +126,14 @@ func (p *Pipeline) TransformBytes(ctx context.Context, data []byte, params Trans
 		if err := applyResize(img, params); err != nil {
 			return nil, "", fmt.Errorf("failed to apply resize: %w", err)
 		}
+	}
+
+	if err := applyEffects(img, params); err != nil {
+		return nil, "", fmt.Errorf("failed to apply effects: %w", err)
+	}
+
+	if err := applyOverlay(img, params); err != nil {
+		return nil, "", fmt.Errorf("failed to apply overlay: %w", err)
 	}
 
 	// 3. Encode image
