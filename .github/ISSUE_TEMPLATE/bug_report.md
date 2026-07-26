@@ -1,43 +1,51 @@
 ---
-name: Bug report
-about: Something in the runtime, CLI, or a driver is not working as expected
-title: "[Bug] "
+name: "🐛 Bug Report"
+about: Report an issue in the Optivor Go engine, server runtime, CLI, or client SDKs
+title: "[Bug]: "
 labels: bug
+assignees: ''
 ---
 
-## What happened
+## 🐛 Description
+A clear and concise description of what the bug is.
 
-A clear description of the incorrect behavior.
+## 📦 Affected Subsystem / Component
+Please select the component where the issue occurs:
+- [ ] Go Server Engine (`internal/server`, `internal/pipeline`)
+- [ ] Storage Driver (`S3`, `GCS`, `Azure`, `Local`)
+- [ ] Cache Adapter (`Local`, `Redis`, `Edge CDN`)
+- [ ] CLI Tool (`cmd/optivor`, `internal/cli`)
+- [ ] `@optivor/js` (JS / TS SDK)
+- [ ] `@optivor/react` (React SDK)
+- [ ] `@optivor/vue` (Vue SDK)
+- [ ] `@optivor/next` (Next.js Loader)
+- [ ] `optivor` (Python SDK)
+- [ ] `optivor/optivor-php` (PHP SDK)
 
-## Expected behavior
+## 🔄 Steps to Reproduce
+1. Go to '...'
+2. Request URL / Run command '...'
+3. See error '...'
 
-What you expected to happen instead.
+## 🎯 Expected Behavior
+A clear description of what you expected to happen instead.
 
-## Steps to reproduce
+## 💻 Environment & Version
+- **Optivor Engine Version / Commit**: (e.g. `v1.2.2` or git commit `abcdef`)
+- **SDK Package & Version**: (e.g. `@optivor/react@1.2.2`)
+- **Storage Backend**: (e.g., AWS S3, MinIO, Google Cloud Storage, Local Filesystem)
+- **Deployment Platform**: (Docker, Kubernetes, Standalone Binary, Cloudflare Workers)
+- **OS & Architecture**: (e.g. Ubuntu 24.04 ARM64, macOS Sequoia M2, Windows 11)
 
-1.
-2.
-3.
-
-## Environment
-
-- Optivor version / commit:
-- Storage backend (e.g., AWS S3, MinIO):
-- Deployment target (standalone, Cloudflare, AWS, Kubernetes, etc.):
-- OS / architecture:
-
-## Config (redact any secrets)
-
+## ⚙️ Configuration (Redact any API Keys / Secrets)
 ```yaml
-# paste relevant config here
+# Relevant optivor.yaml snippet
 ```
 
-## Logs / error output
-
+## 📜 Logs & Error Output
+```text
+Paste relevant server logs or console stack trace here
 ```
-paste relevant logs here
-```
 
-## Additional context
-
-Anything else that might be relevant (screenshots, related issues, etc.).
+## 🖼️ Screenshots / Minimal Code Reproduction
+If applicable, add screenshots or a minimal code snippet to help explain your problem.

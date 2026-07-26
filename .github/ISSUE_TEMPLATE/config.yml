@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security Vulnerability Reporting
+    url: https://github.com/optivor/optivor/security/advisories/new
+    about: Report security issues privately through GitHub Private Vulnerability Reporting. Do NOT open public issues for security vulnerabilities.
+  - name: 📚 Documentation & Wiki
+    url: https://github.com/optivor/optivor/tree/main/docs/wiki
+    about: Read the architectural specs, driver guides, and SDK integration manuals.
