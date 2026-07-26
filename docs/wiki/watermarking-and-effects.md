@@ -71,3 +71,21 @@ Optivor includes built-in visual filters for placeholder creation, UI background
 ```bash
 curl "http://localhost:8080/image/default/hero.jpg?w=600&blur=15&grayscale=true&pixelate=4&format=webp" -o filtered.webp
 ```
+
+---
+
+## 5. Watermark Security & Anti-Tamper Protection
+
+When serving protected or copyrighted media, preventing clients from stripping `overlay=` or watermark parameters from the URL is critical. Optivor provides two zero-trust architectural mechanisms:
+
+### A. HMAC URL Signatures (`securityKey`)
+When URL signing is enabled on Optivor (`securityKey` in config or SDK):
+- The server generates an HMAC-SHA256 signature calculated over the entire URL path **and** query string parameters (including `overlay=...`, `opacity=...`, `gravity=...`).
+- If an end-user or bad actor attempts to strip `overlay=watermark.png` from the URL, the signature check fails immediately with **`403 Forbidden`**.
+
+### B. Server-Side Presets (`/preset/{presetName}/{key}`)
+For maximum security without exposing transform query parameters:
+- Define a preset in `optivor.yaml` (e.g. `watermarked_preview` with `overlay: "logo.png"`).
+- Frontend applications request `/preset/watermarked_preview/photos/item.jpg`.
+- Because the overlay configuration resides strictly on the Optivor engine, there are no `overlay` query parameters present in the URL string to strip.
+

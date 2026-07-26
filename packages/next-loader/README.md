@@ -1,5 +1,11 @@
 # `@optivor/next`
 
+[![npm version](https://img.shields.io/npm/v/@optivor/next.svg)](https://www.npmjs.com/package/@optivor/next)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/optivor/optivor.svg?style=social)](https://github.com/optivor/optivor)
+
+⭐ **If you find Optivor useful, please consider giving us a [Star on GitHub](https://github.com/optivor/optivor)!**
+
 Zero-config Next.js `next/image` component and loader integration for Optivor.
 
 ## Installation
