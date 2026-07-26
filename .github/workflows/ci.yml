@@ -27,7 +27,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libvips-dev libheif-dev
+          sudo apt-get install -y libvips-dev libheif-dev libaom-dev
 
       - name: Run Build
         run: go build ./...
