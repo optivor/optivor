@@ -19,3 +19,9 @@ optivor.local.yaml
 .DS_Store
 .idea/
 .vscode/
+
+# Python & Package Builds
+.venv/
+*.egg-info/
+build/
+__pycache__/
