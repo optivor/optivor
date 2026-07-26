@@ -24,6 +24,11 @@ use Optivor\OptivorClient;
 
 $optivor = new OptivorClient('https://optivor.example.com', 's3-bucket');
 
+```php
+// Preset-based URL generation (Recommended)
+$presetUrl = $optivor->presetUrl('avatar', 'users/john.jpg');
+// => https://optivor.example.com/preset/avatar/s3-bucket/users/john.jpg
+
 // Basic optimized WebP URL
 $url = $optivor->url('products/shoes.jpg', [
     'width' => 600,

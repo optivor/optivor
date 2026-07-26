@@ -43,6 +43,26 @@ const imageUrl = optivor.buildUrl('users/avatar.jpg', {
 
 ---
 
+## Preset-Based Image Optimization (Recommended)
+
+Optivor encourages server-configured presets (e.g. `avatar`, `profile`, `hero`, `thumbnail`) to maintain consistent dimensions and security policies across your application.
+
+```javascript
+// Build URL using a server-side preset
+const presetUrl = optivor.buildPresetUrl('avatar', 'users/john.jpg');
+// => https://optivor.example.com/preset/avatar/s3-bucket/users/john.jpg
+
+// Build preset URL with optional overrides
+const customPresetUrl = optivor.buildUrl('users/john.jpg', {
+  preset: 'profile',
+  format: 'avif'
+});
+// => https://optivor.example.com/preset/profile/s3-bucket/users/john.jpg?format=avif
+```
+
+
+---
+
 ## Advanced Transformation Options
 
 `@optivor/js` supports all Optivor V1.2 transformation parameters:
