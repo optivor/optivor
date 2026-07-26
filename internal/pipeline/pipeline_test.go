@@ -167,6 +167,109 @@ func TestPipeline_AVIF(t *testing.T) {
 	}
 }
 
+func TestPipeline_FocalCrop(t *testing.T) {
+	rawJPG := createTestJPEG(400, 300)
+	driver := &mockStorageDriver{
+		data: map[string][]byte{
+			"sample.jpg": rawJPG,
+		},
+	}
+
+	pipe := pipeline.NewPipeline()
+	ctx := context.Background()
+
+	params := pipeline.TransformParams{
+		Width:  100,
+		Height: 100,
+		Fit:    pipeline.FitFocal,
+		FocalX: 0.3,
+		FocalY: 0.7,
+		Format: "webp",
+	}
+
+	res, contentType, err := pipe.Run(ctx, driver, "sample.jpg", params)
+	if err != nil {
+		t.Fatalf("focal crop failed: %v", err)
+	}
+
+	if contentType != "image/webp" {
+		t.Errorf("expected image/webp, got %s", contentType)
+	}
+
+	if len(res) == 0 {
+		t.Error("expected non-empty focal cropped output")
+	}
+}
+
+func TestPipeline_ImageFilters(t *testing.T) {
+	rawJPG := createTestJPEG(200, 200)
+	driver := &mockStorageDriver{
+		data: map[string][]byte{
+			"sample.jpg": rawJPG,
+		},
+	}
+
+	pipe := pipeline.NewPipeline()
+	ctx := context.Background()
+
+	params := pipeline.TransformParams{
+		Width:     100,
+		Height:    100,
+		Format:    "webp",
+		Blur:      5.0,
+		Grayscale: true,
+		Pixelate:  4,
+	}
+
+	res, contentType, err := pipe.Run(ctx, driver, "sample.jpg", params)
+	if err != nil {
+		t.Fatalf("filter transformation failed: %v", err)
+	}
+
+	if contentType != "image/webp" {
+		t.Errorf("expected image/webp, got %s", contentType)
+	}
+
+	if len(res) == 0 {
+		t.Error("expected non-empty filtered image output")
+	}
+}
+
+func TestPipeline_Overlay(t *testing.T) {
+	rawJPG := createTestJPEG(300, 300)
+	overlayJPG := createTestJPEG(50, 50)
+	driver := &mockStorageDriver{
+		data: map[string][]byte{
+			"sample.jpg": rawJPG,
+		},
+	}
+
+	pipe := pipeline.NewPipeline()
+	ctx := context.Background()
+
+	params := pipeline.TransformParams{
+		Width:        200,
+		Height:       200,
+		Format:       "webp",
+		OverlayBytes: overlayJPG,
+		Gravity:      "bottom_right",
+		OverlayScale: 20,
+	}
+
+	res, contentType, err := pipe.Run(ctx, driver, "sample.jpg", params)
+	if err != nil {
+		t.Fatalf("overlay transformation failed: %v", err)
+	}
+
+	if contentType != "image/webp" {
+		t.Errorf("expected image/webp, got %s", contentType)
+	}
+
+	if len(res) == 0 {
+		t.Error("expected non-empty overlay output")
+	}
+}
+
 func BenchmarkPipeline_ResizeWebP(b *testing.B) {
 	rawJPG := createTestJPEG(800, 600)
 	driver := &mockStorageDriver{
