@@ -22,6 +22,8 @@ optivor.local.yaml
 
 # Python & Package Builds
 .venv/
+venv/
+env/
 *.egg-info/
 build/
 __pycache__/
