@@ -1,0 +1,13 @@
+{
+  "name": "@optivor/vue",
+  "version": "1.2.0",
+  "description": "Official Vue 3 & Nuxt component for Optivor image engine",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@optivor/js": "^1.2.0"
+  }
+}

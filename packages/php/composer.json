@@ -1,0 +1,14 @@
+{
+  "name": "optivor/optivor-php",
+  "description": "Official PHP & Laravel SDK for Optivor image optimization engine",
+  "type": "library",
+  "license": "Apache-2.0",
+  "autoload": {
+    "psr-4": {
+      "Optivor\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.4"
+  }
+}
