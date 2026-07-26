@@ -33,10 +33,11 @@ interface OptivorClientOptions {
 
 ## 3. URL Construction Contract
 
-SDKs must implement a deterministic `buildUrl(key, params)` method:
+SDKs must implement both dynamic transformation URLs (`/image/...`) and server-preset URLs (`/preset/{presetName}/...`):
 
 ```typescript
 interface TransformParams {
+  preset?: string;         // Pre-configured server preset (e.g. "avatar", "profile", "thumb")
   width?: number;
   height?: number;
   fit?: 'cover' | 'contain' | 'fill' | 'smart' | 'focal';
@@ -51,11 +52,15 @@ interface TransformParams {
 }
 ```
 
+### Preset-First Approach
+Optivor encourages preset-first image optimization (`/preset/avatar/user.jpg`). Preset URLs enforce centralized dimensions, quality, and caching rules defined in `optivor.yaml`. All client SDKs support `buildPresetUrl(presetName, key, params)` alongside `buildUrl()`.
+
 ### Signature Generation
 When `securityKey` is configured:
 1. Append expiration timestamp `expires=<unix_timestamp>` (if provided).
 2. Generate SHA-256 HMAC signature over the raw path and query string.
 3. Append `s=<signature>` parameter.
+
 
 ---
 

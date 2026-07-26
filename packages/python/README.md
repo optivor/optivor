@@ -27,6 +27,11 @@ optivor = OptivorClient(
     default_bucket="my-bucket"
 )
 
+```python
+# Preset-based image optimization (Recommended)
+preset_url = optivor.build_preset_url("avatar", "users/john.jpg")
+# => https://optivor.example.com/preset/avatar/my-bucket/users/john.jpg
+
 # Generate WebP image URL
 url = optivor.build_url(
     "photos/landscape.jpg",

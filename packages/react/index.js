@@ -3,6 +3,7 @@ const { OptivorClient } = require('@optivor/js');
 
 function OptivorImage({
   src,
+  preset,
   width,
   height,
   fit = 'cover',
@@ -21,7 +22,8 @@ function OptivorImage({
   ...rest
 }) {
   const client = new OptivorClient({ baseUrl });
-  const imageUrl = client.buildUrl(src, {
+  const params = {
+    preset,
     width,
     height,
     fit,
@@ -33,11 +35,15 @@ function OptivorImage({
     blur,
     grayscale,
     pixelate
-  });
+  };
+
+  const imageUrl = preset
+    ? client.buildPresetUrl(preset, src, params)
+    : client.buildUrl(src, params);
 
   const srcset = width ? [
-    `${client.buildUrl(src, { width, height, fit, format, blur, grayscale })} 1x`,
-    `${client.buildUrl(src, { width: width * 2, height: height ? height * 2 : undefined, fit, format, blur, grayscale })} 2x`
+    `${preset ? client.buildPresetUrl(preset, src, { width, height, fit, format, blur, grayscale }) : client.buildUrl(src, { width, height, fit, format, blur, grayscale })} 1x`,
+    `${preset ? client.buildPresetUrl(preset, src, { width: width * 2, height: height ? height * 2 : undefined, fit, format, blur, grayscale }) : client.buildUrl(src, { width: width * 2, height: height ? height * 2 : undefined, fit, format, blur, grayscale })} 2x`
   ].join(', ') : undefined;
 
   return React.createElement('img', {

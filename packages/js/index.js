@@ -5,12 +5,32 @@ class OptivorClient {
     this.securityKey = options.securityKey || '';
   }
 
-  buildUrl(key, params = {}) {
+  buildPresetUrl(presetName, key, params = {}) {
     const cleanKey = key.startsWith('/') ? key.slice(1) : key;
     const fullPath = this.defaultBucket && !cleanKey.includes('/') 
       ? `${this.defaultBucket}/${cleanKey}` 
       : cleanKey;
 
+    const query = this._buildQuery(params);
+    const queryString = query.toString();
+    return `${this.baseUrl}/preset/${presetName}/${fullPath}${queryString ? '?' + queryString : ''}`;
+  }
+
+  buildUrl(key, params = {}) {
+    if (params.preset) {
+      return this.buildPresetUrl(params.preset, key, params);
+    }
+    const cleanKey = key.startsWith('/') ? key.slice(1) : key;
+    const fullPath = this.defaultBucket && !cleanKey.includes('/') 
+      ? `${this.defaultBucket}/${cleanKey}` 
+      : cleanKey;
+
+    const query = this._buildQuery(params);
+    const queryString = query.toString();
+    return `${this.baseUrl}/image/${fullPath}${queryString ? '?' + queryString : ''}`;
+  }
+
+  _buildQuery(params = {}) {
     const query = new URLSearchParams();
     if (params.width || params.w) query.set('w', params.width || params.w);
     if (params.height || params.h) query.set('h', params.height || params.h);
@@ -27,9 +47,7 @@ class OptivorClient {
     if (params.blur) query.set('blur', params.blur);
     if (params.grayscale) query.set('grayscale', 'true');
     if (params.pixelate) query.set('pixelate', params.pixelate);
-
-    const queryString = query.toString();
-    return `${this.baseUrl}/image/${fullPath}${queryString ? '?' + queryString : ''}`;
+    return query;
   }
 }
 

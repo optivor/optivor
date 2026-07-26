@@ -13,13 +13,33 @@ class OptivorClient
         $this->defaultBucket = $defaultBucket;
     }
 
-    public function url(string $key, array $params = []): string
+    public function presetUrl(string $presetName, string $key, array $params = []): string
     {
         $cleanKey = ltrim($key, '/');
         $fullPath = ($this->defaultBucket && !str_contains($cleanKey, '/'))
             ? "{$this->defaultBucket}/{$cleanKey}"
             : $cleanKey;
 
+        $query = $this->buildQuery($params);
+        return "{$this->baseUrl}/preset/{$presetName}/{$fullPath}" . ($query ? "?{$query}" : '');
+    }
+
+    public function url(string $key, array $params = []): string
+    {
+        if (!empty($params['preset'])) {
+            return $this->presetUrl($params['preset'], $key, $params);
+        }
+        $cleanKey = ltrim($key, '/');
+        $fullPath = ($this->defaultBucket && !str_contains($cleanKey, '/'))
+            ? "{$this->defaultBucket}/{$cleanKey}"
+            : $cleanKey;
+
+        $query = $this->buildQuery($params);
+        return "{$this->baseUrl}/image/{$fullPath}" . ($query ? "?{$query}" : '');
+    }
+
+    private function buildQuery(array $params): string
+    {
         $queryParams = [];
         if (isset($params['width']) || isset($params['w'])) {
             $queryParams['w'] = $params['width'] ?? $params['w'];
@@ -55,7 +75,6 @@ class OptivorClient
             $queryParams['pixelate'] = $params['pixelate'];
         }
 
-        $query = http_build_query($queryParams);
-        return "{$this.baseUrl}/image/{$fullPath}" . ($query ? "?{$query}" : '');
+        return http_build_query($queryParams);
     }
 }
