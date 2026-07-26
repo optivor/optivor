@@ -1,10 +1,19 @@
 {
   "name": "@optivor/js",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Official JavaScript/TypeScript SDK for Optivor image optimization engine",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/optivor/optivor.git",
+    "directory": "packages/js"
+  },
+  "homepage": "https://github.com/optivor/optivor#readme",
+  "bugs": {
+    "url": "https://github.com/optivor/optivor/issues"
+  },
   "keywords": [
     "optivor",
     "image-optimization",
