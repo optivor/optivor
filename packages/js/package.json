@@ -1,9 +1,24 @@
 {
   "name": "@optivor/js",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Official JavaScript/TypeScript SDK for Optivor image optimization engine",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "Apache-2.0",
-  "keywords": ["optivor", "image", "cdn", "sdk", "optimization", "webp", "avif"]
+  "keywords": [
+    "optivor",
+    "image-optimization",
+    "image-cdn",
+    "image-resizer",
+    "image-processing",
+    "webp",
+    "avif",
+    "cloudinary-alternative",
+    "imgix-alternative",
+    "thumbor-alternative",
+    "watermark",
+    "smart-crop",
+    "responsive-images",
+    "sdk"
+  ]
 }

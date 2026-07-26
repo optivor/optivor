@@ -4,9 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optivor"
-version = "1.2.2"
+version = "1.2.3"
 description = "Official Python SDK for Optivor image optimization engine (Django / FastAPI support)"
 readme = "README.md"
 authors = [{ name = "Optivor Team" }]
 license = { text = "Apache-2.0" }
+keywords = [
+  "optivor",
+  "image-optimization",
+  "image-processing",
+  "django-images",
+  "fastapi-images",
+  "flask-images",
+  "cloudinary-alternative",
+  "imgix-alternative",
+  "webp-converter",
+  "avif",
+  "watermark"
+]
 dependencies = []

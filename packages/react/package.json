@@ -1,13 +1,28 @@
 {
   "name": "@optivor/react",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Official React SDK & Image component for Optivor image engine",
   "main": "index.js",
   "license": "Apache-2.0",
+  "keywords": [
+    "optivor",
+    "react-image",
+    "nextjs-image",
+    "image-component",
+    "responsive-images",
+    "image-optimization",
+    "srcset",
+    "lazy-loading",
+    "cloudinary-react",
+    "imgix-react",
+    "webp",
+    "avif",
+    "watermark"
+  ],
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@optivor/js": "^1.2.2"
+    "@optivor/js": "^1.2.3"
   }
 }
