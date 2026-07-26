@@ -83,6 +83,36 @@ curl -H "X-API-Key: optivor_user_a_key" \
 
 ---
 
+## Terminal CLI Management (`optivor iam`)
+
+Optivor CLI includes subcommands for inspecting and managing IAM roles and API key bindings directly from the terminal:
+
+```bash
+# List all active IAM roles and path policies
+optivor iam role list --config optivor.yaml
+
+# Output:
+# ROLE NAME          DESCRIPTION                         CAPABILITIES   ALLOWED PATHS
+# admin              Built-in System Administrator       *              *
+# editor             Built-in Media Editor               read, write    *
+# reader-path-only   Built-in Path Restricted Reader     read           *
+# user-a-role        Sadece user-a dizinine erişim izni  read           users/user-a/*
+
+# Register or update an IAM role
+optivor iam role add tenant-b-role --capabilities read,write --paths "users/tenant-b/*"
+
+# Delete an IAM role definition
+optivor iam role delete tenant-b-role
+
+# List API keys and role bindings
+optivor iam key list --config optivor.yaml
+
+# Register a new API key with role binding
+optivor iam key add tenant-key-b --key secret123 --role tenant-b-role
+```
+
+---
+
 ## Architecture Specification
 
 For technical implementation details, middleware mechanics, and security guarantees, consult:

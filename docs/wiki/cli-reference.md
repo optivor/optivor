@@ -83,3 +83,25 @@ optivor bucket lifecycle set <alias> [--ttl-days 30] [--rule-file lifecycle.yaml
 # Delete retention lifecycle rules
 optivor bucket lifecycle delete <alias> [--rule-id id] [--all]
 ```
+
+### `optivor iam`
+
+Manages IAM roles, path authorization policies, and API key bindings.
+
+```bash
+# List all active IAM roles and path policies
+optivor iam role list [--config optivor.yaml]
+
+# Add or update an IAM role definition
+optivor iam role add <role-name> [--capabilities read,write] [--paths "users/user-a/*"]
+
+# Delete an IAM role
+optivor iam role delete <role-name>
+
+# List active API keys and their role bindings
+optivor iam key list [--config optivor.yaml]
+
+# Register an API key bound to an IAM role
+optivor iam key add <key-name> --key <secret> [--role role-name] [--buckets "*"]
+```
+
