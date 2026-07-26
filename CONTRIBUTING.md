@@ -1,102 +1,112 @@
 # Contributing to Optivor
 
-Thank you for considering a contribution. This document explains how the
-project is organized so you can find the right place to start — and so
-you don't need to read the entire codebase before you can contribute.
+Thank you for your interest in contributing to **Optivor**! Optivor is an open-source image optimization engine and multi-ecosystem SDK suite designed for high-performance, secure media delivery.
 
-## Before anything else
+This guide outlines our development workflow, repository organization, and pull request expectations.
 
-Read these two documents. Most "why did you design it this way"
-questions are already answered there:
+---
 
-- [`docs/adr/0000-project-scope.md`](./docs/adr/0000-project-scope.md) —
-  what's in scope right now, what isn't.
-- [`docs/adr/0001-project-philosophy.md`](./docs/adr/0001-project-philosophy.md) —
-  the principles every design decision is checked against.
+## 1. Prerequisites & Local Environment
 
-If you're proposing something that touches architecture or an extension
-point, also read
-[`docs/adr/0002-high-level-architecture.md`](./docs/adr/0002-high-level-architecture.md)
-and
-[`docs/adr/0003-extensibility-model.md`](./docs/adr/0003-extensibility-model.md).
+### Core Engine Requirements
+- **Go**: Version `1.25.0` or higher
+- **C Libraries (Image Codecs)**:
+  - **Ubuntu / Debian**: `sudo apt-get install -y libvips-dev libheif-dev`
+  - **macOS**: `brew install vips libheif`
 
-## Local Development Setup
+### SDK Requirements (Monorepo)
+- **Node.js**: `18+` (npm or pnpm) for JavaScript, React, Vue, and Next.js packages
+- **Python**: `3.9+` (with `build` and `twine`) for the Python SDK
+- **PHP**: `7.4+` (with Composer) for the PHP SDK
 
-### Prerequisites
+---
 
-- **Go**: 1.25 or higher
-- **System Dependencies**:
-  - Ubuntu/Debian: `sudo apt-get install -y libvips-dev libheif-dev`
-  - macOS: `brew install vips libheif`
+## 2. Project Architecture & Monorepo Structure
 
-### Building & Testing
+Optivor is structured as a modular Go core engine alongside client SDK packages:
+
+```
+optivor/
+├── cmd/optivor/               # Binary CLI entrypoint
+├── internal/
+│   ├── server/                # HTTP transformation API & preset routing
+│   ├── pipeline/              # Image resizing, cropping, & visual filters
+│   ├── storage/               # Multi-bucket drivers (S3, GCS, Azure, Local)
+│   └── cache/                 # Local, Redis, and Edge CDN cache adapters
+├── packages/
+│   ├── js/                    # @optivor/js (TypeScript / JS client)
+│   ├── react/                 # @optivor/react (<OptivorImage /> component)
+│   ├── vue/                   # @optivor/vue (Vue 3 / Nuxt component)
+│   ├── next-loader/           # @optivor/next (Next.js custom loader)
+│   ├── python/                # optivor (PyPI Python SDK)
+│   └── php/                   # optivor/optivor-php (Composer PHP SDK)
+└── docs/                      # Architectural Decision Records (ADRs) & Wiki
+```
+
+Before proposing architectural changes, please read the relevant ADRs:
+- [`docs/adr/0000-project-scope.md`](./docs/adr/0000-project-scope.md) — Scope boundary
+- [`docs/adr/0001-project-philosophy.md`](./docs/adr/0001-project-philosophy.md) — Design principles
+- [`docs/adr/0002-high-level-architecture.md`](./docs/adr/0002-high-level-architecture.md) — Subsystem boundaries
+
+---
+
+## 3. Branching & Commit Conventions
+
+### Branching Strategy
+Optivor follows a strict **dual-branching model**:
+- **`main`**: Production release branch. Contains tagged releases and stable code.
+- **`staging`**: Integration branch. **All Pull Requests must target `staging`**.
+
+When creating a feature or bug fix:
+```bash
+git checkout staging
+git pull origin staging
+git checkout -b feat/your-feature-name
+```
+
+### Commit Message Format
+We follow Conventional Commits:
+- `feat(scope)`: A new feature (e.g. `feat(server): add focal point crop parameter`)
+- `fix(scope)`: A bug fix (e.g. `fix(storage/s3): resolve bucket path escaping`)
+- `docs(scope)`: Documentation changes (e.g. `docs(readme): update preset usage`)
+- `bump(packages)`: Version bump across SDKs
+- `refactor(scope)`: Code refactoring without behavioral changes
+
+---
+
+## 4. Local Building & Testing
+
+Run local tests and security scanners before submitting a Pull Request:
 
 ```bash
-# Compile binary
+# Build binary
 make build
 
-# Run unit and integration tests
+# Run Go unit & integration tests
 go test ./... -v -race -cover
 
-# Run static analysis
+# Run static analysis & vulnerability scans
 go vet ./...
 golangci-lint run
 govulncheck ./...
+
+# Test JavaScript SDKs
+cd packages/js && npm test
 ```
 
-## You can own a subsystem, not the whole codebase
+---
 
-Optivor is deliberately split into layers with narrow boundaries (CLI,
-Runtime, Storage Drivers, Deployment Adapters — see ADR-0002). This means
-you can contribute a Storage Driver, for example, by reading only the
-driver interface and its tests — you don't need to understand the CLI or
-any deployment adapter to do it well. If a PR review asks you to
-understand a part of the codebase far outside what you're changing,
-that's worth flagging as a process problem, not something to push
-through.
+## 5. Subsystem Map & Guidance
 
-## Where to start
+| I want to... | Start Here | Notes |
+| :--- | :--- | :--- |
+| **Fix a Core Bug** | Open a **Bug Report** issue first | Unless trivial, discuss bug details before opening a PR |
+| **Add Storage Driver** | Read [`docs/adr/0003-extensibility-model.md`](./docs/adr/0003-extensibility-model.md) | Submit a **Driver Proposal** issue before writing code |
+| **Propose Engine Feature** | Open a **Feature Request** issue | Ensure fit with current milestone scope in `ROADMAP.md` |
+| **Improve SDKs / Docs** | PRs directly to `staging` | Include updated tests and `README.md` examples |
 
-| I want to... | Start here |
-|---|---|
-| Fix a bug in the runtime | Open an issue first using the Bug Report template, unless the fix is trivial and obvious |
-| Add a new Storage Driver | Read `docs/adr/0003-extensibility-model.md`, then open a Driver Proposal issue before writing code |
-| Add a new Deployment Adapter | Same as above — these are separate repositories once the pattern is established |
-| Propose a new feature | Open a Feature Request issue; do not submit a PR before there's agreement it fits current scope (ADR-0000) |
-| Improve docs | PRs welcome directly, no issue required |
+---
 
-## Scope discipline
+## 6. Code of Conduct
 
-Before proposing a feature, check
-[`docs/adr/0000-project-scope.md`](./docs/adr/0000-project-scope.md) and
-[`ROADMAP.md`](./ROADMAP.md). If what you want to build isn't in the
-current milestone, it doesn't mean it's unwanted — it means it needs to
-be discussed and scheduled first, so the project doesn't grow faster than
-it can be reviewed and maintained. PRs that silently expand scope beyond
-the current milestone will be asked to split or wait, not merged as-is.
-
-## Pull request expectations
-
-- Keep PRs scoped to one logical change. Large, multi-concern PRs are
-  harder to review and more likely to stall.
-- If your change affects an architectural boundary (e.g., adds a new
-  kind of extension point, changes a driver interface), it likely needs
-  a new ADR, not just a PR description. Ask in the issue first if you're
-  unsure.
-- Tests are expected for any change to the Runtime or a Storage Driver.
-- Update relevant documentation in the same PR as the code change, not
-  as a follow-up.
-
-## Code review and ownership
-
-See [`CODEOWNERS`](./CODEOWNERS) for who reviews which parts of the
-repository. If you become a regular, trusted contributor to a specific
-subsystem (a driver, an adapter), maintainership of that subsystem is
-something we actively want to hand off — open an issue if you'd like to
-discuss taking on that role.
-
-## Code of conduct
-
-Be respectful, assume good faith, and keep disagreements focused on the
-technical merits. A formal Code of Conduct document will be added as the
-contributor base grows; until then, this paragraph is the standard.
+Optivor is committed to providing a welcoming, inclusive, and harassment-free community. Please review and adhere to our [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md).
