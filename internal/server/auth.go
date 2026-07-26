@@ -73,8 +73,41 @@ func SignedURLMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 	}
 }
 
+// MatchPathPrefix evaluates whether targetPath satisfies any allowed prefix pattern.
+// Pattern format rules:
+// - "*" or empty: matches any path
+// - "prefix/*" or "prefix/": matches any key starting with "prefix/"
+// - exact match (e.g. "users/avatar.png"): matches targetPath exactly
+func MatchPathPrefix(allowedPaths []string, targetPath string) bool {
+	if len(allowedPaths) == 0 {
+		return true
+	}
+	targetPath = strings.TrimPrefix(targetPath, "/")
+	for _, pattern := range allowedPaths {
+		pattern = strings.TrimPrefix(pattern, "/")
+		if pattern == "*" || pattern == "" {
+			return true
+		}
+		if strings.HasSuffix(pattern, "*") {
+			prefix := strings.TrimSuffix(pattern, "*")
+			if strings.HasPrefix(targetPath, prefix) {
+				return true
+			}
+		}
+		if targetPath == pattern {
+			return true
+		}
+	}
+	return false
+}
+
 // ValidateAPIKey checks if the request header contains a valid API key with required scope and bucket access.
 func ValidateAPIKey(r *http.Request, cfg *config.Config, bucket string, requiredScope string) bool {
+	return ValidateIAMAccess(r, cfg, bucket, "", requiredScope)
+}
+
+// ValidateIAMAccess checks if the request contains valid authentication and authorization for the given bucket, object path, and required scope/capability.
+func ValidateIAMAccess(r *http.Request, cfg *config.Config, bucket string, objectPath string, requiredScope string) bool {
 	if cfg == nil || len(cfg.Auth.APIKeys) == 0 {
 		return true
 	}
@@ -93,6 +126,36 @@ func ValidateAPIKey(r *http.Request, cfg *config.Config, bucket string, required
 
 	for _, k := range cfg.Auth.APIKeys {
 		if k.Key == key {
+			var roleCapabilities []string
+			var roleAllowedPaths []string
+
+			if k.Role != "" {
+				foundRole := false
+				for _, role := range cfg.Auth.Roles {
+					if strings.EqualFold(role.Name, k.Role) {
+						roleCapabilities = role.Capabilities
+						roleAllowedPaths = role.AllowedPaths
+						foundRole = true
+						break
+					}
+				}
+
+				if !foundRole {
+					switch strings.ToLower(k.Role) {
+					case "admin":
+						roleCapabilities = []string{"*"}
+						roleAllowedPaths = []string{"*"}
+					case "editor":
+						roleCapabilities = []string{"read", "write"}
+						roleAllowedPaths = []string{"*"}
+					case "reader-path-only":
+						roleCapabilities = []string{"read"}
+						roleAllowedPaths = []string{"*"}
+					}
+				}
+			}
+
+			// Validate Bucket Access
 			bucketAllowed := false
 			if len(k.Buckets) == 0 {
 				bucketAllowed = true
@@ -108,15 +171,40 @@ func ValidateAPIKey(r *http.Request, cfg *config.Config, bucket string, required
 				return false
 			}
 
-			if requiredScope == "" || len(k.Scopes) == 0 {
-				return true
+			// Validate Scope / Capabilities
+			scopes := k.Scopes
+			if len(scopes) == 0 && len(roleCapabilities) > 0 {
+				scopes = roleCapabilities
 			}
-			for _, s := range k.Scopes {
-				if s == "*" || s == requiredScope {
-					return true
+
+			scopeAllowed := false
+			if requiredScope == "" || len(scopes) == 0 {
+				scopeAllowed = true
+			} else {
+				for _, s := range scopes {
+					if s == "*" || strings.EqualFold(s, requiredScope) {
+						scopeAllowed = true
+						break
+					}
 				}
 			}
-			return false
+			if !scopeAllowed {
+				return false
+			}
+
+			// Validate Path Prefix Access
+			allowedPaths := k.AllowedPaths
+			if len(allowedPaths) == 0 && len(roleAllowedPaths) > 0 {
+				allowedPaths = roleAllowedPaths
+			}
+
+			if objectPath != "" && len(allowedPaths) > 0 {
+				if !MatchPathPrefix(allowedPaths, objectPath) {
+					return false
+				}
+			}
+
+			return true
 		}
 	}
 
