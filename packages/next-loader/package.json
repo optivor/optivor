@@ -1,14 +1,20 @@
 {
   "name": "@optivor/next",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Zero-config Optivor custom image loader for Next.js next/image component",
   "main": "index.js",
   "keywords": [
     "optivor",
     "nextjs",
-    "next/image",
+    "next-image",
+    "next-image-loader",
+    "image-loader",
     "image-optimization",
-    "loader"
+    "cloudinary-nextjs",
+    "imgix-nextjs",
+    "webp",
+    "avif",
+    "responsive-images"
   ],
   "author": "Optivor Team",
   "license": "Apache-2.0",

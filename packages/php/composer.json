@@ -3,6 +3,16 @@
   "description": "Official PHP & Laravel SDK for Optivor image optimization engine",
   "type": "library",
   "license": "Apache-2.0",
+  "keywords": [
+    "optivor",
+    "image-optimization",
+    "laravel-image",
+    "php-image-processing",
+    "cloudinary-alternative",
+    "responsive-images",
+    "webp",
+    "avif"
+  ],
   "autoload": {
     "psr-4": {
       "Optivor\\": "src/"
