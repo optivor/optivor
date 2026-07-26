@@ -7,7 +7,6 @@
 *.test
 *.out
 /bin/
-/dist/
 /optivor
 
 # Local config overrides / cache
@@ -27,5 +26,4 @@ env/
 *.egg-info/
 build/
 dist/
-packages/*/dist/
 __pycache__/
