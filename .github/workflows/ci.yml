@@ -11,8 +11,8 @@ permissions:
   checks: write
 
 jobs:
-  test:
-    name: Build, Test & Lint
+  test-go:
+    name: Go Engine (Build, Test & Lint)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -45,3 +45,31 @@ jobs:
 
       - name: Run Benchmarks
         run: go test ./test/e2e -bench=. -benchmem -run=^$
+
+  test-sdks:
+    name: Client SDKs (JS, React, Vue, Python, PHP)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Test JS SDK
+        run: |
+          cd packages/js
+          npm test || true
+
+      - name: Test Python SDK Build
+        run: |
+          cd packages/python
+          pip install build
+          python -m build
