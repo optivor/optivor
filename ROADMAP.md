@@ -137,16 +137,18 @@ Status: ✅ Completed.
   - [x] `docs/wiki/watermarking-and-effects.md` — Comprehensive parameter reference for watermarks, overlays, and image filters.
   - [x] `docs/wiki/client-sdk-specification.md` — Standardized framework SDK contract for official client libraries.
 
-## Future Planned — Granular IAM & Path-Level Access Control (Target Version TBD)
+## V1.3 — Granular IAM & Path-Level Access Control (Completed)
 
 Goal: Provide fine-grained role-based access control (RBAC) and IAM path policies for multi-bucket / single URL routing, enabling user-level path isolation (e.g., user-A restricted to `s3://bucket/folder-a/*`).
 
-- [ ] **Path-Based Prefix Authorization Policies**: Restrict API key tokens and signed URLs to specific object key prefixes/folders within S3/R2 buckets.
-- [ ] **Role-Based Privilege Definition (IAM Rules)**: Support declarative role definitions (`admin`, `editor`, `reader-path-only`) mapping identities to bucket/prefix capabilities.
-- [ ] **ADR & Architecture Specifications**:
-  - [ ] `docs/adr/0019-iam-path-privilege-and-role-policy.md` — Specification for IAM role evaluation and path-level prefix validation.
-- [ ] **Wiki Documentation**:
-  - [ ] `docs/wiki/iam-path-authorization-guide.md` — Guide for defining folder-level privileges and role policies in Optivor.
+Status: ✅ Completed.
+
+- [x] **Path-Based Prefix Authorization Policies**: Restrict API key tokens and signed URLs to specific object key prefixes/folders within S3/R2 buckets.
+- [x] **Role-Based Privilege Definition (IAM Rules)**: Support declarative role definitions (`admin`, `editor`, `reader-path-only`) mapping identities to bucket/prefix capabilities.
+- [x] **ADR & Architecture Specifications**:
+  - [x] `docs/adr/0019-iam-path-privilege-and-role-policy.md` — Specification for IAM role evaluation and path-level prefix validation.
+- [x] **Wiki Documentation**:
+  - [x] `docs/wiki/iam-path-authorization-guide.md` — Guide for defining folder-level privileges and role policies in Optivor.
 
 ## Future Planned — Open-Core Cloud Control Plane Integration (Target Version TBD)
 

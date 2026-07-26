@@ -127,13 +127,23 @@ type ImageConfig struct {
 type AuthConfig struct {
 	SignedURLs SignedURLsConfig `mapstructure:"signed_urls"`
 	APIKeys    []APIKeyConfig   `mapstructure:"api_keys"`
+	Roles      []RoleConfig     `mapstructure:"roles"`
+}
+
+type RoleConfig struct {
+	Name         string   `mapstructure:"name"`
+	Description  string   `mapstructure:"description"`
+	Capabilities []string `mapstructure:"capabilities"`
+	AllowedPaths []string `mapstructure:"allowed_paths"`
 }
 
 type APIKeyConfig struct {
-	Key     string   `mapstructure:"key"`
-	Name    string   `mapstructure:"name"`
-	Buckets []string `mapstructure:"buckets"`
-	Scopes  []string `mapstructure:"scopes"`
+	Key          string   `mapstructure:"key"`
+	Name         string   `mapstructure:"name"`
+	Role         string   `mapstructure:"role"`
+	Buckets      []string `mapstructure:"buckets"`
+	Scopes       []string `mapstructure:"scopes"`
+	AllowedPaths []string `mapstructure:"allowed_paths"`
 }
 
 type SignedURLsConfig struct {
@@ -286,6 +296,11 @@ func Validate(cfg *Config) error {
 	}
 	if cfg.Auth.SignedURLs.Enabled && cfg.Auth.SignedURLs.Secret == "" {
 		return errors.New("auth.signed_urls.secret is required when auth.signed_urls.enabled is true")
+	}
+	for i, r := range cfg.Auth.Roles {
+		if r.Name == "" {
+			return fmt.Errorf("auth.roles[%d].name is required", i)
+		}
 	}
 	return nil
 }
