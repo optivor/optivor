@@ -73,6 +73,47 @@ func SignedURLMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 	}
 }
 
+// IAMAuthMiddleware enforces API Key and IAM role/path-level authorization policies when cfg.Auth.APIKeys is configured.
+func IAMAuthMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if cfg == nil || len(cfg.Auth.APIKeys) == 0 || r.URL.Path == "/healthz" || r.URL.Path == "/health" || r.URL.Path == "/metrics" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			bucket := "default"
+			objectPath := ""
+
+			if strings.HasPrefix(r.URL.Path, "/image/") {
+				relPath := strings.TrimPrefix(r.URL.Path, "/image/")
+				parts := strings.SplitN(relPath, "/", 2)
+				if len(parts) == 2 {
+					bucket = parts[0]
+					objectPath = parts[1]
+				} else if len(parts) == 1 {
+					objectPath = parts[0]
+				}
+			} else if strings.HasPrefix(r.URL.Path, "/preset/") {
+				relPath := strings.TrimPrefix(r.URL.Path, "/preset/")
+				parts := strings.SplitN(relPath, "/", 3)
+				if len(parts) >= 3 {
+					objectPath = parts[2]
+				}
+			} else if r.URL.Path == "/fetch" || r.URL.Path == "/remote" {
+				objectPath = r.URL.Query().Get("url")
+			}
+
+			if !ValidateIAMAccess(r, cfg, bucket, objectPath, "read") {
+				http.Error(w, "Forbidden: unauthorized IAM access or invalid API key", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // MatchPathPrefix evaluates whether targetPath satisfies any allowed prefix pattern.
 // Pattern format rules:
 // - "*" or empty: matches any path
