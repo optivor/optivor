@@ -1,8 +1,28 @@
 # Optivor
 
-> **High-performance, single-binary image processing & multi-bucket storage proxy built in Go.**
-> 
-> Stop paying $500/mo for Cloudinary or Next/Image optimization. Connect your existing S3/R2/B2 buckets and handle dynamic WebP/AVIF transformations at scale with zero vendor lock-in.
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/optivor/optivor/main/docs/assets/logo.png" alt="Optivor Logo" width="180" onError="this.style.display='none'" />
+
+### High-performance, single-binary image processing & multi-bucket storage proxy built in Go.
+
+[![GitHub stars](https://img.shields.io/github/stars/optivor/optivor?style=for-the-badge&logo=github&color=FFD700)](https://github.com/optivor/optivor/stargazers)
+[![npm version](https://img.shields.io/npm/v/@optivor/js?style=for-the-badge&color=cb3837&logo=npm)](https://www.npmjs.com/package/@optivor/js)
+[![PyPI version](https://img.shields.io/pypi/v/optivor?style=for-the-badge&color=3776ab&logo=python)](https://pypi.org/project/optivor/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/optivor/optivor/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/optivor/optivor/actions)
+
+Stop paying $500/mo for Cloudinary or Next/Image optimization. Connect your existing S3/R2/B2 buckets and handle dynamic WebP/AVIF transformations at scale with zero vendor lock-in.
+
+[⚡ 5-Minute Quickstart](#5-minute-quick-start) • [📦 Ecosystem SDKs](#4-official-ecosystem-client-sdks) • [📖 Documentation](./docs/wiki/introduction.md) • [💬 Community](https://github.com/optivor/optivor/discussions)
+
+---
+
+⭐ **If you find Optivor useful, please consider giving it a star on GitHub — it helps the project grow!**
+
+---
+
+</div>
 
 ```mermaid
 graph LR
@@ -22,6 +42,7 @@ graph LR
 | **Cost at Scale** | Predictable ($0/flat) | High & Dynamic | Sudden Spike Risk | Predictable |
 | **Deploy-Proof Cache** | Yes | N/A | No (Lost on deploy) | Manual Setup |
 | **Multi-Bucket Routing** | Native | Complex | No | No |
+| **Tamper-Proof Watermarks** | Built-in (HMAC) | Extra Cost | No | HMAC |
 | **Bot / Crawler Shield** | Built-in | Paid Add-on | No | Manual Setup |
 | **Single Binary (Go)** | Yes | Cloud Service | Node.js Runtime | Go/C++ |
 
@@ -39,16 +60,19 @@ It is not an image hosting service and does not lock your data into a proprietar
 
 > [!NOTE]
 > **Zero-Config Local Fallback & 100% Env Var Support:** Optivor V1.1+ boots into instant Zero-Config local storage mode (`./storage`) without cloud credentials or YAML files, and supports 100% environment variable configuration for PaaS/Serverless deployments.
->
+
 > [!NOTE]
 > **Multi-Bucket Routing & Access Control:** Optivor V0.6+ supports multi-bucket declarative routing (`buckets[]`) with per-bucket security policies (`public`, `signed`, `private`) and cross-provider failover chains.
->
+
 > [!NOTE]
 > **Persistent Caching & Bot Protection:** V0.9+ introduces deploy-proof persistent cache stores, transparent remote fetching (`/fetch`, `/remote`), and crawler concurrency rate limiting.
->
+
 > [!NOTE]
 > **Stateless Scaling & Smart K8s Deployments:** V1.0+ introduces attention/entropy-based Smart Cropping (`fit=smart`), a stateless Redis cache backend for multi-pod scaling, and official Kubernetes Helm Chart deployment adapters.
->
+
+> [!IMPORTANT]
+> **Tamper-Proof Watermarking & HMAC Protection:** Watermark overlays cannot be bypassed by removing URL parameters. When HMAC signed URLs or Preset routes are enabled, Optivor cryptographically verifies signatures so unauthorized users cannot strip watermarks or manipulate transformations.
+
 > [!IMPORTANT]
 > **DoS Protection Notice:** Enforce reasonable `max_width` and `max_height` values in `optivor.yaml` to prevent decompression-bomb attacks.
 
@@ -191,6 +215,8 @@ curl -i "http://localhost:8080/fetch?url=https://example.com/photo.png&w=600&for
 
 Response returns `Content-Type: image/webp` and `X-Optivor-Cache: MISS` (or `HIT` on subsequent requests).
 
+---
+
 ### 4. Official Ecosystem Client SDKs
 
 Optivor provides official SDK packages for seamless frontend and backend framework integration:
@@ -237,12 +263,18 @@ import { OptivorImage } from '@optivor/react';
 />
 ```
 
-**Python (`optivor`)**
+**Python / Django (`optivor`)**
 ```python
 from optivor import OptivorClient
 
-optivor = OptivorClient("https://optivor.example.com", "prod-bucket")
+optivor = OptivorClient("https://optivor.example.com", security_key="my-secret-key")
 url = optivor.build_url("photos/hero.jpg", width=800, height=600, format="webp", blur=10)
+```
+
+**PHP / Laravel (`@optivor`)**
+```html
+{{-- In Laravel Blade template --}}
+<img src="@optivor('avatar', 'users/john.jpg')" alt="User Avatar" />
 ```
 
 ---
@@ -339,6 +371,12 @@ Explore the complete Optivor documentation in [`docs/wiki/`](./docs/wiki):
 - [ADR-0016: Zero-Config Fallback & Env Override Matrix](./docs/adr/0016-zero-config-fallback-and-env-override-matrix.md) — Precedence hierarchy specification
 - [ADR-0017: Watermarking Overlays and Focal Crop](./docs/adr/0017-watermarking-overlays-and-focal-crop.md) — libvips compositing & focal point calculation specification
 - [FAQ](./docs/wiki/faq.md) — Frequently asked questions
+
+---
+
+## Community & Contributing
+
+We welcome contributions! Please see [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`SECURITY.md`](./SECURITY.md) for contribution guidelines and security disclosure policies.
 
 ---
 
