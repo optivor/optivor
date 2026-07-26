@@ -18,6 +18,13 @@
       "Optivor\\": "src/"
     }
   },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Optivor\\OptivorServiceProvider"
+      ]
+    }
+  },
   "require": {
     "php": ">=7.4"
   }
