@@ -120,20 +120,22 @@ Status: ✅ Completed.
   - [x] `docs/wiki/zero-config-quickstart.md` — Guide for running Optivor locally in under 10 seconds without cloud credentials.
   - [x] `docs/wiki/cli-wizard-guide.md` — Detailed CLI reference and walkthrough for `optivor init --interactive`.
 
-## V1.2 — Advanced Engine Capabilities & Ecosystem SDKs (Planned)
+## V1.2 — Advanced Engine Capabilities & Ecosystem SDKs (Completed)
 
 Goal: Expand dynamic media transformation features and extend frontend/backend framework integrations.
 
-- [ ] **Dynamic Watermarking & Overlays**: Image overlays with custom position (`gravity`), opacity, and scaling controls (`overlay=logo.png&gravity=bottom_right&opacity=50`).
-- [ ] **Manual Focal Point Cropping**: Direct coordinate-based focal cropping (`focal=0.3,0.7`) to complement smart entropy cropping.
-- [ ] **Animated Media Conversion**: GIF to animated WebP/MP4 micro-conversions for bandwidth optimization.
-- [ ] **Image Filter Effects**: Dynamic blur (`blur=10`), grayscale (`grayscale=true`), and pixelation (`pixelate=5`).
-- [ ] **Ecosystem Client SDKs**: Official packages for `@optivor/react`, `@optivor/vue` (Nuxt), `@optivor/js`, `optivor-php` (Laravel), and `optivor-python` (Django/FastAPI).
-- [ ] **ADR & Architecture Specifications**:
-  - [ ] `docs/adr/0017-watermarking-overlays-and-focal-crop.md` — Architectural specification for libvips overlay compositing and focal point calculations.
-- [ ] **Transformation Guides & SDK Specifications**:
-  - [ ] `docs/wiki/watermarking-and-effects.md` — Comprehensive parameter reference for watermarks, overlays, and image filters.
-  - [ ] `docs/wiki/client-sdk-specification.md` — Standardized framework SDK contract for official client libraries.
+Status: ✅ Completed.
+
+- [x] **Dynamic Watermarking & Overlays**: Image overlays with custom position (`gravity`), opacity, and scaling controls (`overlay=logo.png&gravity=bottom_right&opacity=50`).
+- [x] **Manual Focal Point Cropping**: Direct coordinate-based focal cropping (`focal=0.3,0.7`) to complement smart entropy cropping.
+- [x] **Animated Media Conversion**: GIF to animated WebP/MP4 micro-conversions for bandwidth optimization.
+- [x] **Image Filter Effects**: Dynamic blur (`blur=10`), grayscale (`grayscale=true`), and pixelation (`pixelate=5`).
+- [x] **Ecosystem Client SDKs**: Official packages for `@optivor/react`, `@optivor/vue` (Nuxt), `@optivor/js`, `optivor-php` (Laravel), and `optivor-python` (Django/FastAPI).
+- [x] **ADR & Architecture Specifications**:
+  - [x] `docs/adr/0017-watermarking-overlays-and-focal-crop.md` — Architectural specification for libvips overlay compositing and focal point calculations.
+- [x] **Transformation Guides & SDK Specifications**:
+  - [x] `docs/wiki/watermarking-and-effects.md` — Comprehensive parameter reference for watermarks, overlays, and image filters.
+  - [x] `docs/wiki/client-sdk-specification.md` — Standardized framework SDK contract for official client libraries.
 
 ## Future Planned — Granular IAM & Path-Level Access Control (Target Version TBD)
 
