@@ -1,8 +1,17 @@
 {
   "name": "@optivor/next",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Zero-config Optivor custom image loader for Next.js next/image component",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/optivor/optivor.git",
+    "directory": "packages/next-loader"
+  },
+  "homepage": "https://github.com/optivor/optivor#readme",
+  "bugs": {
+    "url": "https://github.com/optivor/optivor/issues"
+  },
   "keywords": [
     "optivor",
     "nextjs",
