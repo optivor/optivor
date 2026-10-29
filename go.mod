@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/davidbyttow/govips/v2 v2.18.0
-	github.com/go-chi/chi/v5 v5.3.1
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/minio/minio-go/v7 v7.1.0
 	github.com/prometheus/client_golang v1.19.0
 	github.com/redis/go-redis/v9 v9.21.0
